@@ -1,17 +1,17 @@
 # License Audit: Open Video Editor
 
 **Project license:** Apache-2.0 (`LICENSE` header: "Apache License Version 2.0, January 2004"; `NOTICE`: "Copyright 2026 the Open Video Editor contributors").
-**Overall risk:** LOW. No GPL, AGPL, or LGPL artifact was found in the `:app` release runtime tree or in the declared catalog. Two items need a human check (see "Uncertain items"), and both are permissive under every reading the files support.
+**Overall risk:** LOW. No GPL, LGPL, AGPL, or ffmpeg artifact was found in the `:app` release runtime tree or in the declared catalog. Items marked "verify" are permissive under every reading the files support.
 
-Scope: every entry in `gradle/libs.versions.toml`, every plugin id and dependency in the nine `build.gradle.kts` files, the two planned additions, and the `:app:releaseRuntimeClasspath` tree (309 unique group:artifact:version coordinates). Licenses are quoted from POM `<licenses>` blocks or LICENSE files as they state them.
+Scope: every entry in `gradle/libs.versions.toml` (five unreferenced entries removed on 2026-11-14), every plugin id and dependency in the nine `build.gradle.kts` files, the Anthropic SDK and OkHttp tree added to `:core:ai`, and the `:app:releaseRuntimeClasspath` tree (343 unique group:artifact:version coordinates as of 2026-11-14). Licenses are quoted from POM `<licenses>` blocks or LICENSE files as they state them.
 
 Source base URLs used below:
 - Google Maven: `https://dl.google.com/dl/android/maven2/<group path>/<artifact>/<version>/<artifact>-<version>.pom`
 - Maven Central: `https://repo1.maven.org/maven2/<group path>/<artifact>/<version>/<artifact>-<version>.pom`
 
-## Declared and planned dependencies and plugins
+## Declared dependencies and plugins
 
-Usage key: **runtime** = shipped in the app or in a module the app depends on; **debug** = `debugImplementation`; **test** = `testImplementation`/`testRuntimeOnly`; **build** = Gradle plugin or build tooling; **catalog-only** = declared in the TOML but referenced by no module; **planned** = not yet in any build file.
+Usage key: **runtime** = shipped in the app or in a module the app depends on; **debug** = `debugImplementation`; **test** = `testImplementation`/`testRuntimeOnly`; **build** = Gradle plugin or build tooling; **not used** = no module references it.
 
 | Dependency (group:artifact:version) | License (as stated) | Source read | Usage | Risk |
 |---|---|---|---|---|
@@ -28,7 +28,6 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | androidx.compose.material3.adaptive:adaptive-layout:1.3.0 | "The Apache Software License, Version 2.0" | Google Maven `.../material3/adaptive/adaptive-layout/1.3.0` POM | ui:shell, ui:timeline, runtime | none |
 | androidx.compose.material3.adaptive:adaptive-navigation:1.3.0 | "The Apache Software License, Version 2.0" | Google Maven `.../material3/adaptive/adaptive-navigation/1.3.0` POM | ui:shell, ui:timeline, runtime | none |
 | androidx.compose.ui:ui-tooling (BOM-resolved 1.12.1) | "The Apache Software License, Version 2.0" | Google Maven `androidx/compose/ui/ui-tooling/1.12.1` POM | app, debugImplementation | none |
-| androidx.compose.ui:ui-tooling-preview (BOM-resolved 1.12.1) | "The Apache Software License, Version 2.0" | Google Maven `androidx/compose/ui/ui-tooling-preview/1.12.1` POM | catalog-only (unused) | none |
 | androidx.media3:media3-common:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-common/1.11.1` POM | core:media, core:render, app, runtime | none |
 | androidx.media3:media3-exoplayer:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-exoplayer/1.11.1` POM | core:media, runtime | none |
 | androidx.media3:media3-transformer:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-transformer/1.11.1` POM | core:media, runtime | none |
@@ -38,12 +37,15 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-core/1.11.0` POM | core:timeline, core:ai, core:mcp, runtime | none |
 | org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-android/1.11.0` POM | core:media, core:render, ui:shell, ui:timeline, runtime | none |
 | org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-test/1.11.0` POM | app, testImplementation | none |
-| io.ktor:ktor-client-core:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-core/3.6.1` POM | core:ai, runtime | none |
-| io.ktor:ktor-client-cio:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-cio/3.6.1` POM | core:ai, runtime | none |
-| io.ktor:ktor-client-content-negotiation:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-content-negotiation/3.6.1` POM | core:ai, runtime | none |
-| io.ktor:ktor-serialization-kotlinx-json:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-serialization-kotlinx-json/3.6.1` POM | core:ai, runtime | none |
-| io.ktor:ktor-client-okhttp:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-okhttp/3.6.1` POM | catalog-only (unused) | none |
-| io.ktor:ktor-server-core, ktor-server-cio, ktor-server-websockets:3.6.1 | "The Apache Software License, Version 2.0" (core checked; cio and websockets POMs also checked) | Maven Central `io/ktor/ktor-server-*/3.6.1` POMs | core:mcp only (not in `:app` tree) | none |
+| io.ktor:ktor-client-core:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-core/3.6.1` POM | removed 2026-11-14 (unused; anthropic-java uses OkHttp) | none |
+| io.ktor:ktor-client-cio:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-cio/3.6.1` POM | removed 2026-11-14 (unused; anthropic-java uses OkHttp) | none |
+| io.ktor:ktor-client-content-negotiation:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-content-negotiation/3.6.1` POM | removed 2026-11-14 (unused; anthropic-java uses OkHttp) | none |
+| io.ktor:ktor-serialization-kotlinx-json:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-serialization-kotlinx-json/3.6.1` POM | removed 2026-11-14 (unused; anthropic-java uses OkHttp) | none |
+| com.anthropic:anthropic-java:3.8.0 (latest 3.x per `maven-metadata.xml`) | "Apache-2.0" | Maven Central `com/anthropic/anthropic-java/3.8.0` POM; GitHub `anthropics/anthropic-sdk-java` LICENSE is "Apache License, Version 2.0" | core:ai, runtime | none |
+| com.anthropic:anthropic-java-core:3.8.0 | "Apache-2.0" | Maven Central `com/anthropic/anthropic-java-core/3.8.0` POM | core:ai, runtime (transitive of anthropic-java) | none |
+| com.anthropic:anthropic-java-client-okhttp:3.8.0 | "Apache-2.0" | Maven Central `com/anthropic/anthropic-java-client-okhttp/3.8.0` POM | core:ai, runtime (transitive of anthropic-java) | none |
+| com.squareup.okhttp3:okhttp:4.12.0 | "The Apache Software License, Version 2.0" (link `apache.org/licenses/LICENSE-2.0.txt`) | Maven Central `com/squareup/okhttp3/okhttp/4.12.0` POM | runtime (transitive of anthropic-java-client-okhttp) | none |
+| com.squareup.okhttp3:mockwebserver:4.12.0 | "The Apache Software License, Version 2.0" (link `apache.org/licenses/LICENSE-2.0.txt`) | Maven Central `com/squareup/okhttp3/mockwebserver/4.12.0` POM | core:ai, test-only | low (test-only, not shipped) |
 | junit:junit:4.13.2 | "Eclipse Public License 1.0" | Maven Central `junit/junit/4.13.2` POM | test (app, core:media, core:render, ui:shell, ui:timeline) | low (EPL is weak copyleft; test-only, not shipped) |
 | org.junit:junit-bom:6.1.3 | "Eclipse Public License v2.0" | Maven Central `org/junit/junit-bom/6.1.3` POM | test (core:ai, core:timeline, core:mcp) | low (test-only, not shipped) |
 | org.junit.jupiter:junit-jupiter:6.1.3 (BOM-resolved) | "Eclipse Public License v2.0" | Maven Central `org/junit/jupiter/junit-jupiter/6.1.3` POM | test | low (test-only, not shipped) |
@@ -53,15 +55,16 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | org.jetbrains.kotlin:kotlin-gradle-plugin:2.4.21 (plugin ids `org.jetbrains.kotlin.jvm`, `.plugin.compose`, `.plugin.serialization`) | "Apache-2.0" | Maven Central `org/jetbrains/kotlin/kotlin-gradle-plugin/2.4.21` POM | build | none |
 | org.jlleitschuh.gradle:ktlint-gradle:14.2.0 (plugin id `org.jlleitschuh.gradle.ktlint`) | "MIT License" (from LICENSE.txt on GitHub `JLLeitschuh/ktlint-gradle`, branch `master`; no `<licenses>` block read from a POM, see Uncertain items) | `https://raw.githubusercontent.com/JLLeitschuh/ktlint-gradle/master/LICENSE.txt`; cached POM in `~/.gradle` | build | low (verify) |
 | com.pinterest.ktlint:ktlint-* 1.5.0 (ktlint engine, pulled in by the plugin) | "MIT" (reporter POMs); GitHub `pinterest/ktlint` repo license reported by GitHub API as "MIT License" (SPDX MIT) | Maven Central POMs cached in `~/.gradle` (`ktlint-cli-reporter-checkstyle-1.5.0.pom` and others); `https://api.github.com/repos/pinterest/ktlint/license` | build | none |
-| com.anthropic:anthropic-java:3.8.0 (latest 3.x per `maven-metadata.xml`) | "Apache-2.0" | Maven Central `com/anthropic/anthropic-java/3.8.0` POM; GitHub `anthropics/anthropic-sdk-java` LICENSE (main) is "Apache License, Version 2.0" | planned (not in any build file yet) | none (its own transitive tree not audited) |
-| io.modelcontextprotocol:kotlin-sdk:0.16.0 | POM: "MIT License". Repo LICENSE at tag `0.16.0` opens: "The MCP project is undergoing a licensing transition from the MIT License to the Apache License, Version 2.0" and says legacy contributions "remain licensed under the MIT License", followed by Apache-2.0 text | Maven Central `io/modelcontextprotocol/kotlin-sdk/0.16.0` POM; `https://raw.githubusercontent.com/modelcontextprotocol/kotlin-sdk/0.16.0/LICENSE` | planned | low (verify; permissive under either reading) |
 | io.github.takahirom.roborazzi:roborazzi, roborazzi-compose, plugin io.github.takahirom.roborazzi:1.79.0 | "Apache-2.0" | Maven Central POM `roborazzi/1.79.0` | :app, test-only (screenshots) | low |
 | org.robolectric:robolectric:4.18 | "The MIT License" | Maven Central POM `robolectric/4.18` | :app, test-only | low |
 | androidx.compose.ui:ui-test-junit4, ui-test-manifest (BOM 2026.09.00) | "The Apache Software License, Version 2.0" | Google Maven POM (ui-test-junit4) | :app, test / debug only | low |
+| io.modelcontextprotocol:kotlin-sdk:0.16.0 | POM: "MIT License". Repo LICENSE at tag `0.16.0` says the project is moving from MIT to Apache-2.0 | Maven Central POM; `https://raw.githubusercontent.com/modelcontextprotocol/kotlin-sdk/0.16.0/LICENSE` | **not used** (MCP server hand-written in `:core:mcp`; no catalog entry, no build file) | none (not shipped). Re-audit if ever added (see Uncertain items) |
+| io.ktor:ktor-client-okhttp, ktor-server-core, ktor-server-cio, ktor-server-websockets, androidx.compose.ui:ui-tooling-preview | removed from `gradle/libs.versions.toml` on 2026-11-14 (no module referenced them) | n/a | removed | n/a |
+| androidx.security:security-crypto | removed in an earlier phase (deprecated upstream, unused) | n/a | removed | n/a |
 
 ## Transitive dependencies (`:app:releaseRuntimeClasspath`)
 
-The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) resolved 309 unique group:artifact:version coordinates. A scan of the tree text for `gpl`, `lgpl`, `agpl`, and `ffmpeg` found no match. No ffmpeg artifact is present, and no `okhttp` artifact is present (`ktor-client-okhttp` is catalog-only). Per-POM license reading was done for the 22 transitive artifacts below. The other 287 coordinates were checked by group name only, not by POM, so the "no GPL" result rests on that scan plus these spot-checks.
+The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) resolved 343 unique group:artifact:version coordinates (309 before the Anthropic SDK was added to `:core:ai`). A scan of the tree text for `gpl`, `lgpl`, `agpl`, and `ffmpeg` (case-insensitive) found **0 matches**. No ffmpeg artifact is present. OkHttp 4.12.0 is now present, as a transitive of `anthropic-java-client-okhttp`. Per-POM license reading was done for the artifacts below. The other coordinates were checked by group name only, not by POM, so the "no GPL" result rests on that scan plus these spot-checks.
 
 | Dependency (group:artifact:version) | License (as stated) | Source read | Usage | Risk |
 |---|---|---|---|---|
@@ -75,7 +78,7 @@ The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) res
 | org.jspecify:jspecify:1.0.0 | "The Apache License, Version 2.0" | Maven Central `org/jspecify/jspecify/1.0.0` POM | runtime (transitive) | none |
 | com.google.j2objc:j2objc-annotations:3.0.0 | "Apache License, Version 2.0" | Maven Central `com/google/j2objc/j2objc-annotations/3.0.0` POM | runtime (transitive) | none |
 | com.google.errorprone:error_prone_annotations:2.28.0 | "Apache 2.0" | Maven Central `com/google/errorprone/error_prone_annotations/2.28.0` POM | runtime (transitive) | none |
-| com.squareup.okio:okio-jvm:3.12.0 | "The Apache Software License, Version 2.0" | Maven Central `com/squareup/okio/okio-jvm/3.12.0` POM | runtime (transitive) | none |
+| com.squareup.okio:okio-jvm:3.12.0 (3.6.0 and 3.10.2 also resolved, upgraded to 3.12.0) | "The Apache Software License, Version 2.0" | Maven Central `com/squareup/okio/okio-jvm/3.12.0` POM | runtime (transitive) | none |
 | org.jetbrains.kotlinx:kotlinx-io-core-jvm:0.9.1 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-io-core-jvm/0.9.1` POM | runtime (transitive) | none |
 | org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.8.0-0.6.x-compat | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-datetime-jvm/0.8.0-0.6.x-compat` POM | runtime (transitive) | none |
 | org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.13.0 | "Apache-2.0" | Maven Central POM | runtime (transitive) | none |
@@ -83,6 +86,13 @@ The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) res
 | org.jetbrains.kotlinx:kotlinx-coroutines-slf4j:1.11.0 | "Apache-2.0" | Maven Central POM | runtime (transitive) | none |
 | io.ktor:ktor-openapi-schema-jvm:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central POM | runtime (transitive) | none |
 | io.ktor:ktor-network-tls-jvm:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central POM | runtime (transitive) | none |
+| com.fasterxml.jackson.core:jackson-core, jackson-databind, jackson-annotations:2.19.4 (jackson-core and databind also at 2.17.2 via other pulls) | "The Apache Software License, Version 2.0" | Maven Central POMs `com/fasterxml/jackson/core/*/2.19.4` | runtime (transitive of anthropic-java-core) | none |
+| com.fasterxml.jackson.module:jackson-module-kotlin:2.19.4 | "The Apache Software License, Version 2.0" | Maven Central POM | runtime (transitive of anthropic-java-core) | none |
+| com.fasterxml.jackson.datatype:jackson-datatype-jdk8, jackson-datatype-jsr310:2.19.4 | POM has no `<licenses>` block; parent `jackson-modules-java8:2.19.4` also has none. Jackson project is Apache-2.0 per the other Jackson POMs | Maven Central POMs | runtime (transitive) | low (verify) |
+| com.fasterxml:classmate:1.7.0 | "Apache License, Version 2.0" | Maven Central POM | runtime (transitive) | none |
+| com.github.victools:jsonschema-generator, jsonschema-module-jackson, jsonschema-module-swagger-2:4.38.0 | "The Apache License, Version 2.0" (on parent `jsonschema-generator-parent:4.38.0` POM; the children have no own block) | Maven Central parent POM | runtime (transitive of anthropic-java-core, schema generation) | none |
+| io.swagger.core.v3:swagger-annotations:2.2.50 | "Apache License 2.0" (on parent `swagger-project:2.2.50` POM) | Maven Central parent POM | runtime (transitive) | none |
+| io.ktor:ktor-client-core, ktor-client-cio, ktor-client-content-negotiation, ktor-serialization-kotlinx-json, ktor-http/-cio, ktor-network, ktor-websockets, ktor-sse, ktor-events, ktor-io, ktor-utils (3.6.1) | "The Apache Software License, Version 2.0" (checked via `ktor-client-core` and `ktor-openapi-schema-jvm`; the rest by group) | Maven Central POMs | runtime (transitive) | none |
 | org.slf4j:slf4j-api:2.0.19 | POM has no `<licenses>` block. LICENSE text at `qos-ch/slf4j` master begins "Copyright (c) 2004-2022 QOS.ch Sarl (Switzerland)" (MIT-style permission grant) | Maven Central POM; `https://raw.githubusercontent.com/qos-ch/slf4j/master/LICENSE.txt` | runtime (transitive) | low (verify) |
 | com.google.guava:guava:33.3.1-android | POM has no `<licenses>` block. Guava repo LICENSE (master) is "Apache License, Version 2.0" | Maven Central POM; `https://raw.githubusercontent.com/google/guava/master/LICENSE` | runtime (transitive) | low (verify) |
 | com.google.guava:failureaccess:1.0.2 | POM has no `<licenses>` block; same Guava project as above | Maven Central POM | runtime (transitive) | low (verify) |
@@ -90,20 +100,19 @@ The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) res
 
 ## Uncertain items (verify)
 
-1. **io.modelcontextprotocol:kotlin-sdk:0.16.0.** The POM says "MIT License". The tag's LICENSE file says the project is moving from MIT to Apache-2.0, with new contributions under Apache-2.0 and legacy contributions still under MIT. The files do not say which license applies to the released artifact. `docs/design/security.md` (line 23) says Apache-2.0 for `main` and states that GitHub reports SPDX `NOASSERTION`. Both readings are permissive. Confirm with the upstream maintainers before the dependency is added, and record the chosen reading.
+1. **com.fasterxml.jackson.datatype:jackson-datatype-jdk8 and jackson-datatype-jsr310 (2.19.4).** Their POMs and the parent `jackson-modules-java8` POM have no `<licenses>` block. The license reading is inferred from the other Jackson artifacts (Apache-2.0). Confirm against the Jackson parent POM for 2.19.4 if the list is re-audited.
 2. **org.jlleitschuh.gradle:ktlint-gradle:14.2.0.** The Maven Central POM path tried returned HTTP 404. The cached POM from the Gradle run has no `<licenses>` block. The "MIT License" reading comes from `LICENSE.txt` on GitHub `master`, not from the 14.2.0 tag. Build-only, not shipped.
 3. **slf4j-api 2.0.19, guava 33.3.1-android, failureaccess 1.0.2, listenablefuture placeholder.** These POMs have no `<licenses>` block. The license reading comes from the upstream repo's master LICENSE, not from the exact release tag. Transitive, likely permissive.
-4. **Planned com.anthropic:anthropic-java 3.8.0.** Its transitive tree has not been resolved. Re-audit when it is added to a catalog or module.
-5. **core:mcp runtime tree.** `core:mcp` (ktor-server-*) is not a dependency of `:app`, so its runtime tree is not in the audited `:app` tree. Only the three top-level ktor-server POMs were read. Run the `core:mcp` dependency report if it ships.
+4. **io.modelcontextprotocol:kotlin-sdk (not used).** Not in any build file. If it is ever added, the POM ("MIT License") and the repo LICENSE (MIT-to-Apache-2.0 transition) need a decision. Both readings are permissive.
+5. **com.github.victools:* (4.38.0).** The upstream `master` LICENSE.txt URL returned 404 when checked, so the Apache-2.0 reading rests on the Maven parent POM only. Permissive; verify if the upstream license file is needed.
 
 ## Surprising findings
 
-- The MCP kotlin-sdk license statements conflict: POM "MIT License" versus the repo's own design doc claiming Apache-2.0 for `main`. See item 1.
-- The anthropic-java SDK is Apache-2.0 in both its POM and its GitHub LICENSE. It is not MIT.
-- `androidx.security:security-crypto` (deprecated upstream, unused) was removed from the catalog in Phase 4.
-- Two catalog entries are unused by any module: `androidx-compose-ui-tooling-preview`, `ktor-client-okhttp`.
+- The anthropic-java SDK is Apache-2.0 in both its POM and its GitHub LICENSE. It is not MIT. Its transitive tree (OkHttp 4.12.0, Okio, Jackson 2.19.4, victools, classmate, swagger-annotations) is all Apache-2.0 or permissive.
+- `androidx.security:security-crypto` (deprecated upstream, unused) was removed from the catalog in an earlier phase. On 2026-11-14 five more unreferenced entries were removed: `androidx-compose-ui-tooling-preview`, `ktor-client-okhttp`, `ktor-server-core`, `ktor-server-cio`, `ktor-server-websockets`. No catalog entry is unused now. `ktor` version is still in use by the `ktor-client-*` entries.
 - kotlin-stdlib resolves to 14 different versions in the release tree (1.6.21 to 2.4.21). This is a version-alignment issue, not a license issue.
 - No ffmpeg or other GPL-family codec artifact is in the tree. Media3 is Apache-2.0 and uses the platform codecs.
+- `:core:mcp` has no third-party runtime dependency beyond kotlinx; its MCP server is hand-written, so the earlier concern about its ktor-server tree no longer applies.
 
 ## How to re-run
 
@@ -123,4 +132,7 @@ curl -s https://dl.google.com/dl/android/maven2/androidx/core/core-ktx/1.19.1/co
   | tr -d '\r' | awk '/<licenses>/,/<\/licenses>/'
 ```
 
-For the planned SDKs, read `maven-metadata.xml` for the version, then the POM for `<licenses>`. Check the GitHub LICENSE on the matching tag, not only `main`.
+For the Anthropic SDK and other Maven Central artifacts, read `maven-metadata.xml` for the version, then the POM for `<licenses>`. Check the GitHub LICENSE on the matching tag, not only `main`.
+
+
+> 2026-11-14 orchestrator: Ktor client artifacts were declared in `:core:ai` but no code imported `io.ktor`; removed from the module and catalog. Ktor rows above are historical. Re-run `:app:dependencies` to confirm the coordinate count.

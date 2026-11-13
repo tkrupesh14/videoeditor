@@ -13,10 +13,6 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     // api: ApiKeyStore and SpendGuard expose StateFlow in their public signatures.
     api(libs.kotlinx.coroutines.core)
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.anthropic.java)
     testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit5.jupiter)

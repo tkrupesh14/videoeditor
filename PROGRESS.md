@@ -27,7 +27,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 5. (done) Opus (medium): 5b-1 :core:ai Claude client (anthropic-java 3.8.0, mock-server tests)
 5b. (done) Opus (medium): 5b-2 AI Settings + AI panel + accept/reject + analysis + Remove silences
 6. (done) Opus (medium): :core:mcp + app bridge
-6b. (next) Haiku: refresh LICENSE_AUDIT.md (anthropic-java 3.8.0, okhttp 4.12, mockwebserver added; MCP SDK not used; ktor maybe unused) + drop unused catalog entries
-7. Sonnet: docs/README/HANDOFF
+6b. (done) Haiku: refresh LICENSE_AUDIT.md (anthropic-java 3.8.0, okhttp 4.12, mockwebserver added; MCP SDK not used; ktor maybe unused) + drop unused catalog entries
+7. (next) Sonnet: docs/README/HANDOFF
 8. Fable: final review (one pass)
 - Cleanup: drop unused security-crypto, ui-tooling-preview, ktor-client-okhttp from catalog once builders finish (avoid concurrent edits)
