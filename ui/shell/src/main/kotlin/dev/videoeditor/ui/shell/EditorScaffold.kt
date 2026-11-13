@@ -222,7 +222,7 @@ private fun ThreePane(
     }
 }
 
-/** Vertical splitter; reports drag deltas in dp. 16dp wide grab area with a resize cursor for pointers. */
+/** Vertical splitter; reports drag deltas in dp. 48dp wide grab area (thin 2dp visual line) with a resize cursor for pointers. */
 @Composable
 private fun Splitter(
     description: String,
@@ -232,7 +232,7 @@ private fun Splitter(
     val state = rememberDraggableState { px -> onDragDp(px / density) }
     Box(
         Modifier
-            .width(16.dp)
+            .width(48.dp)
             .fillMaxHeight()
             .pointerHoverIcon(PointerIcon(AndroidPointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW))
             .draggable(state, Orientation.Horizontal)

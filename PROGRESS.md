@@ -23,8 +23,8 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 1. (done) key store + spend guard
 2. (done) property tests + trim rounding fix
 3. (done) Phase 3 Media3 preview/export
-4. (done) Phase 4 UI shell. NEXT: Sonnet: Roborazzi+Robolectric JVM screenshot tests at phone (360dp) and tablet sizes, polish (48dp splitter touch area)
-5. Opus (medium): :core:ai Messages API client + preview diff UI
+4. (done) Phase 4 UI shell + screenshots + splitter polish
+5. (running) Opus (medium): :core:ai Messages API client + Settings + preview diff UI
 6. Opus (medium): :core:mcp + app bridge
 7. Sonnet: docs/README/HANDOFF
 8. Fable: final review (one pass)

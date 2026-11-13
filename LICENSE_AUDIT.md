@@ -55,6 +55,9 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | com.pinterest.ktlint:ktlint-* 1.5.0 (ktlint engine, pulled in by the plugin) | "MIT" (reporter POMs); GitHub `pinterest/ktlint` repo license reported by GitHub API as "MIT License" (SPDX MIT) | Maven Central POMs cached in `~/.gradle` (`ktlint-cli-reporter-checkstyle-1.5.0.pom` and others); `https://api.github.com/repos/pinterest/ktlint/license` | build | none |
 | com.anthropic:anthropic-java:3.8.0 (latest 3.x per `maven-metadata.xml`) | "Apache-2.0" | Maven Central `com/anthropic/anthropic-java/3.8.0` POM; GitHub `anthropics/anthropic-sdk-java` LICENSE (main) is "Apache License, Version 2.0" | planned (not in any build file yet) | none (its own transitive tree not audited) |
 | io.modelcontextprotocol:kotlin-sdk:0.16.0 | POM: "MIT License". Repo LICENSE at tag `0.16.0` opens: "The MCP project is undergoing a licensing transition from the MIT License to the Apache License, Version 2.0" and says legacy contributions "remain licensed under the MIT License", followed by Apache-2.0 text | Maven Central `io/modelcontextprotocol/kotlin-sdk/0.16.0` POM; `https://raw.githubusercontent.com/modelcontextprotocol/kotlin-sdk/0.16.0/LICENSE` | planned | low (verify; permissive under either reading) |
+| io.github.takahirom.roborazzi:roborazzi, roborazzi-compose, plugin io.github.takahirom.roborazzi:1.79.0 | "Apache-2.0" | Maven Central POM `roborazzi/1.79.0` | :app, test-only (screenshots) | low |
+| org.robolectric:robolectric:4.18 | "The MIT License" | Maven Central POM `robolectric/4.18` | :app, test-only | low |
+| androidx.compose.ui:ui-test-junit4, ui-test-manifest (BOM 2026.09.00) | "The Apache Software License, Version 2.0" | Google Maven POM (ui-test-junit4) | :app, test / debug only | low |
 
 ## Transitive dependencies (`:app:releaseRuntimeClasspath`)
 
