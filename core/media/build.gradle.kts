@@ -17,12 +17,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.media3.common)
-    implementation(libs.androidx.media3.exoplayer)
-    implementation(libs.androidx.media3.transformer)
-    implementation(libs.androidx.media3.effect)
-    implementation(libs.androidx.media3.ui)
+    api(project(":core:timeline"))
     implementation(libs.kotlinx.coroutines.android)
-    implementation(project(":core:timeline"))
     testImplementation(libs.junit4)
 }

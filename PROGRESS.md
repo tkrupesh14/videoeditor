@@ -7,7 +7,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 | 0. Setup (agents, scan, tracking) | done | Opus 5.5 (orchestrator) | |
 | 1. Repo + CI | done | Sonnet (worker) | AGP 9.5.1, Gradle 9.9.1, Kotlin 2.4.21, compileSdk 37 |
 | 2. Timeline engine | done | Fable design, Opus (medium) build | 65 tests; entry points in DECISIONS/timeline.md |
-| 3. Preview + export (Media3) | next | | |
+| 3. Preview + export (Media3) | done (device-untested) | Opus (medium) | gaps in DECISIONS |
 | 4. Responsive UI shell | | | |
 | 5. AI feature A (BYO key) | 5a done (key store + spend guard); 5b (Messages client, UI) queued | Fable design done; Opus building | docs/design/security.md Part A |
 | 6. AI feature B (MCP) | | | |
@@ -22,7 +22,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 ## Queue (strictly one task at a time)
 1. (done) key store + spend guard
 2. (done) property tests + trim rounding fix
-3. Opus (medium): Phase 3 Media3 preview/export
+3. (done) Phase 3 Media3 preview/export
 4. Opus (medium): Phase 4 UI shell, then Sonnet polish
 5. Opus (medium): :core:ai Messages API client + preview diff UI
 6. Opus (medium): :core:mcp + app bridge
