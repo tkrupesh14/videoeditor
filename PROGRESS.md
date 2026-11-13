@@ -9,7 +9,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 | 2. Timeline engine | done | Fable design, Opus (medium) build | 65 tests; entry points in DECISIONS/timeline.md |
 | 3. Preview + export (Media3) | done (device-untested) | Opus (medium) | gaps in DECISIONS |
 | 4. Responsive UI shell | done (device-untested); polish+screenshots next | Opus (medium) | |
-| 5. AI feature A (BYO key) | 5a done (key store + spend guard); 5b (Messages client, UI) queued | Fable design done; Opus building | docs/design/security.md Part A |
+| 5. AI feature A (BYO key) | 5a done; 5b-1 :core:ai Claude client done (100 tests, mocked API); 5b-2 Android UI next | Fable design done; Opus building | docs/design/security.md Part A |
 | 6. AI feature B (MCP) | | | |
 | 7. Polish + docs | | | |
 | 8. Final review | | | |
@@ -24,7 +24,8 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 2. (done) property tests + trim rounding fix
 3. (done) Phase 3 Media3 preview/export
 4. (done) Phase 4 UI shell + screenshots + splitter polish
-5. (running) Opus (medium): :core:ai Messages API client + Settings + preview diff UI
+5. (done) Opus (medium): 5b-1 :core:ai Claude client (anthropic-java 3.8.0, mock-server tests)
+5b. (next) Opus (medium): 5b-2 AI Settings screen + AI panel + preview diff accept/reject + analysis wiring
 6. Opus (medium): :core:mcp + app bridge
 7. Sonnet: docs/README/HANDOFF
 8. Fable: final review (one pass)
