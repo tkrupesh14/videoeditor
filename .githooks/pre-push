@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Re-scan every tracked file before anything leaves the machine.
+exec "$(git rev-parse --show-toplevel)/scripts/secret-scan.sh" --all

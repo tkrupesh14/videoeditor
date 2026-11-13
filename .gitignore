@@ -1,0 +1,41 @@
+# Gradle / build outputs
+.gradle/
+build/
+**/build/
+.kotlin/
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# Local config and secrets
+local.properties
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+keystore.properties
+secrets.properties
+google-services.json
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+.externalNativeBuild/
+.cxx/
+
+# Logs
+*.log
+hs_err_pid*
+
+# Claude Code local state (agent definitions in .claude/agents are committed)
+.claude/settings.local.json
