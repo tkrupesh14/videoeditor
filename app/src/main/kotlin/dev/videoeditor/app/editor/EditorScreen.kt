@@ -1,5 +1,12 @@
 package dev.videoeditor.app.editor
 
+import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.ContextWrapper
+import android.os.Build
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -14,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -31,6 +39,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
 import dev.videoeditor.core.media.ThumbnailProvider
 import dev.videoeditor.timeline.model.MediaClip
+import dev.videoeditor.ui.shell.AiPanel
+import dev.videoeditor.ui.shell.AiPanelActions
+import dev.videoeditor.ui.shell.AiPendingBar
+import dev.videoeditor.ui.shell.AiSettingsActions
 import dev.videoeditor.ui.shell.EditorLayoutMode
 import dev.videoeditor.ui.shell.EditorScaffold
 import dev.videoeditor.ui.shell.EditorTab
@@ -53,6 +65,7 @@ fun EditorScreen(
     layoutMode: EditorLayoutMode,
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val ai by vm.ai.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val thumbnails = remember { ThumbnailProvider(context) }
@@ -71,12 +84,46 @@ fun EditorScreen(
         }
     }
 
+    LaunchedEffect(ai.clipboardClearRequests) {
+        if (ai.clipboardClearRequests > 0) clearClipboard(context)
+    }
+
     if (state.showSettings) {
         BackHandler { vm.closeSettings() }
-        SettingsScreen(onBack = vm::closeSettings)
+        SecureWindow()
+        val settingsActions =
+            remember(vm) {
+                AiSettingsActions(
+                    validateKey = vm::validateApiKey,
+                    onSaveKey = vm::saveApiKey,
+                    onRemoveKey = vm::removeApiKey,
+                    onPaste = { readClipboard(context) },
+                    onModelSelected = vm::selectAiModel,
+                    onShareFramesChanged = vm::setShareFrames,
+                    onSaveCaps = vm::saveSpendCaps,
+                    onNewSession = vm::aiNewSession,
+                )
+            }
+        SettingsScreen(ai.settings, settingsActions, onBack = vm::closeSettings)
         return
     }
-    BackHandler(enabled = state.tab == EditorTab.INSPECTOR) { vm.selectTab(EditorTab.PREVIEW) }
+    BackHandler(enabled = state.tab == EditorTab.INSPECTOR || state.tab == EditorTab.AI) {
+        vm.selectTab(EditorTab.PREVIEW)
+    }
+    val aiActions =
+        remember(vm) {
+            AiPanelActions(
+                onSend = vm::aiSend,
+                onCancel = vm::aiCancel,
+                onAccept = vm::aiAccept,
+                onReject = vm::aiReject,
+                onRemoveSilences = vm::removeSilences,
+                onDismissMessage = vm::aiDismissMessage,
+                onOpenSettings = vm::openSettings,
+                onNewSession = vm::aiNewSession,
+                onConsent = vm::aiConsent,
+            )
+        }
 
     val topBarActions =
         remember(vm) {
@@ -134,10 +181,12 @@ fun EditorScreen(
             timeline = { m ->
                 val tl = state.toTimelineState()
                 Column(m) {
+                    state.aiPendingTitle?.let { AiPendingBar(it, vm::aiAccept, vm::aiReject) }
                     TimelineToolbar(tl, vm::onTimelineEvent)
                     Timeline(tl, vm::onTimelineEvent, clipContent = { ThumbnailClipContent(it, thumbnails) })
                 }
             },
+            ai = { m -> AiPanel(ai.panel, aiActions, m) },
         )
         state.export?.let { ExportDialog(it, onCancel = vm::cancelExport, onDismiss = vm::dismissExport) }
     }
@@ -187,4 +236,41 @@ private fun BoxScope.ThumbnailClipContent(
         }
     }
     DefaultClipContent(block)
+}
+
+/** FLAG_SECURE while composed (the API key screen): blocks screenshots, recording, casting and the recents thumbnail. */
+@Composable
+private fun SecureWindow() {
+    val context = LocalContext.current
+    DisposableEffect(context) {
+        val window = context.findActivity()?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        onDispose { window?.clearFlags(WindowManager.LayoutParams.FLAG_SECURE) }
+    }
+}
+
+private tailrec fun Context.findActivity(): Activity? =
+    when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> null
+    }
+
+/** One user-initiated clipboard read for the Paste button. */
+private fun readClipboard(context: Context): CharSequence? {
+    val cm = context.getSystemService(ClipboardManager::class.java) ?: return null
+    return cm.primaryClip
+        ?.takeIf { it.itemCount > 0 }
+        ?.getItemAt(0)
+        ?.coerceToText(context)
+}
+
+/** After a key is saved: the app never leaves the key on the clipboard. */
+private fun clearClipboard(context: Context) {
+    val cm = context.getSystemService(ClipboardManager::class.java) ?: return
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        cm.clearPrimaryClip()
+    } else {
+        cm.setPrimaryClip(ClipData.newPlainText("", ""))
+    }
 }

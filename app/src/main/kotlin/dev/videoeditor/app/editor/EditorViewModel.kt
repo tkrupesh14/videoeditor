@@ -2,6 +2,9 @@ package dev.videoeditor.app.editor
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dev.videoeditor.app.ai.AiEditController
+import dev.videoeditor.app.ai.AiPorts
+import dev.videoeditor.app.ai.AiState
 import dev.videoeditor.timeline.command.AddCaption
 import dev.videoeditor.timeline.command.AddClip
 import dev.videoeditor.timeline.command.AddTrack
@@ -71,6 +74,10 @@ data class EditorUiState(
     val showSettings: Boolean = false,
     val tab: EditorTab = EditorTab.PREVIEW,
     val message: String? = null,
+    /** True while an AI request runs or a suggestion is pending: the timeline is read-only. */
+    val aiLocked: Boolean = false,
+    /** Title of the pending suggestion; [project] then shows its preview. */
+    val aiPendingTitle: String? = null,
 )
 
 /**
@@ -84,6 +91,7 @@ class EditorViewModel(
     private val store: ProjectStore,
     private val importer: MediaImporter,
     private val availability: MediaAvailability,
+    aiPorts: AiPorts,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val autosaveDebounceMs: Long = 500,
 ) : ViewModel() {
@@ -97,6 +105,19 @@ class EditorViewModel(
     private var exportJob: Job? = null
     private var shuttleHintShown = false
     private val listener: AutoCloseable
+
+    private val aiController =
+        AiEditController(
+            session = session,
+            scope = viewModelScope,
+            ports = aiPorts,
+            io = ioDispatcher,
+            onMessage = { showMessage(it) },
+            onPendingChanged = { refreshForAi() },
+        )
+
+    /** AI panel and settings state. */
+    val ai: StateFlow<AiState> = aiController.state
 
     init {
         listener = session.addListener { onSessionChanged(it) }
@@ -153,6 +174,7 @@ class EditorViewModel(
         project: Project,
         note: String,
     ) {
+        if (readOnly()) return
         preview.pause()
         session.load(project)
         _state.update { it.copy(selection = emptySet(), playheadUs = 0L, scrollUs = 0L) }
@@ -192,7 +214,7 @@ class EditorViewModel(
         sessionState.value = s
         _state.update { ui ->
             ui.copy(
-                project = s.project,
+                project = aiController.state.value.pendingProject ?: s.project,
                 revision = s.revision,
                 canUndo = s.canUndo,
                 canRedo = s.canRedo,
@@ -220,25 +242,55 @@ class EditorViewModel(
         if (s.transactionOpen) return
         if (!force && s.revision == lastPreviewRevision) return
         lastPreviewRevision = s.revision
+        val shown = aiController.state.value.pendingProject ?: s.project
         val notPlayable =
-            s.project.assets
+            shown.assets
                 .filter { uriAvailable[it.uri] != true }
                 .map { it.id }
                 .toSet()
-        preview.setProject(playableProject(s.project, notPlayable), ++previewKey)
+        preview.setProject(playableProject(shown, notPlayable), ++previewKey)
+    }
+
+    /** The AI lock or pending preview changed: show the previewed project (or the real one again). */
+    private fun refreshForAi() {
+        val a = aiController.state.value
+        _state.update {
+            it.copy(
+                project = a.pendingProject ?: session.project,
+                aiLocked = a.locked,
+                aiPendingTitle = a.pendingTitle,
+                selection = if (a.locked) emptySet() else it.selection,
+            )
+        }
+        if (a.pendingProject !== lastShownPending) {
+            lastShownPending = a.pendingProject
+            pushPreview(force = true)
+        }
+    }
+
+    private var lastShownPending: Project? = null
+
+    /** True (and tells the user) when the timeline is read-only because of an AI request or suggestion. */
+    private fun readOnly(): Boolean {
+        if (!aiController.locked) return false
+        showMessage(READ_ONLY_MESSAGE)
+        return true
     }
 
     private fun execute(command: Command): Boolean {
+        if (readOnly()) return false
         val r = session.execute(command)
         if (r is CommandResult.Failure) showMessage(r.error.message)
         return r is CommandResult.Success
     }
 
     fun undo() {
+        if (readOnly()) return
         session.undo()
     }
 
     fun redo() {
+        if (readOnly()) return
         session.redo()
     }
 
@@ -248,14 +300,16 @@ class EditorViewModel(
         when (event) {
             is TimelineEvent.Seek -> seek(event.timeUs)
             is TimelineEvent.SelectClip ->
-                _state.update {
-                    val sel =
-                        when {
-                            !event.additive -> setOf(event.clipId)
-                            event.clipId in it.selection -> it.selection - event.clipId
-                            else -> it.selection + event.clipId
-                        }
-                    it.copy(selection = sel)
+                if (!aiController.locked) {
+                    _state.update {
+                        val sel =
+                            when {
+                                !event.additive -> setOf(event.clipId)
+                                event.clipId in it.selection -> it.selection - event.clipId
+                                else -> it.selection + event.clipId
+                            }
+                        it.copy(selection = sel)
+                    }
                 }
             TimelineEvent.ClearSelection -> _state.update { it.copy(selection = emptySet()) }
             is TimelineEvent.ViewportChanged ->
@@ -268,6 +322,7 @@ class EditorViewModel(
             is TimelineEvent.SetSnapping -> _state.update { it.copy(snapping = event.enabled) }
             is TimelineEvent.Execute -> execute(event.command)
             is TimelineEvent.GestureStart -> {
+                if (readOnly()) return
                 if (_state.value.isPlaying) preview.pause()
                 session.beginTransaction(event.label)
             }
@@ -291,6 +346,7 @@ class EditorViewModel(
     }
 
     fun splitAtPlayhead() {
+        if (readOnly()) return
         val s = _state.value
         val cmd = TimelineEdits.splitAtPlayhead(s.project, s.selection, s.playheadUs)
         if (cmd == null) showMessage("No clip under the playhead to split") else execute(cmd)
@@ -301,6 +357,7 @@ class EditorViewModel(
     }
 
     fun addCaptionAtPlayhead() {
+        if (readOnly()) return
         val start = _state.value.playheadUs
         if (execute(AddCaption(listOf(CaptionSpec(start, start + 2_000_000, "Caption"))))) {
             val id =
@@ -351,7 +408,7 @@ class EditorViewModel(
         value: Double,
     ) {
         val ids = _state.value.selection.toList()
-        if (ids.isEmpty()) return
+        if (ids.isEmpty() || readOnly()) return
         if (!session.state.transactionOpen) {
             val label =
                 when (property) {
@@ -383,7 +440,7 @@ class EditorViewModel(
     // ---- Media ----
 
     fun onMediaPicked(uris: List<String>) {
-        if (uris.isEmpty()) return
+        if (uris.isEmpty() || readOnly()) return
         viewModelScope.launch {
             _state.update { it.copy(importing = true) }
             try {
@@ -399,6 +456,7 @@ class EditorViewModel(
             is ImportOutcome.Unsupported -> showMessage(outcome.message)
             is ImportOutcome.Failed -> showMessage("Import failed: ${outcome.message}")
             is ImportOutcome.Ready -> {
+                if (readOnly()) return
                 val p = session.newPreview()
                 val r = p.submit(outcome.command)
                 if (r is CommandResult.Failure) {
@@ -416,6 +474,7 @@ class EditorViewModel(
 
     fun addAssetToTimeline(assetId: String) {
         val asset = session.project.asset(assetId) ?: return
+        if (readOnly()) return
         val p = session.newPreview()
         if (!appendClip(p, asset)) return
         val c = session.commitPreview(p, "Add ${asset.displayName ?: "clip"}", Origin.USER)
@@ -493,6 +552,47 @@ class EditorViewModel(
         if (_state.value.export !is ExportDialogState.Running) _state.update { it.copy(export = null) }
     }
 
+    // ---- AI ----
+
+    fun aiSend(instruction: String) {
+        if (session.state.transactionOpen) session.commitTransaction()
+        preview.pause()
+        aiController.send(instruction)
+    }
+
+    fun aiConsent(agree: Boolean) = aiController.onConsent(agree)
+
+    fun aiCancel() = aiController.cancel()
+
+    fun aiAccept() = aiController.accept()
+
+    fun aiReject() = aiController.reject()
+
+    fun aiDismissMessage() = aiController.dismissMessage()
+
+    fun aiNewSession() = aiController.newSession()
+
+    fun removeSilences() {
+        if (session.state.transactionOpen) session.commitTransaction()
+        preview.pause()
+        aiController.removeSilences()
+    }
+
+    fun validateApiKey(candidate: CharSequence): String? = aiController.validateKey(candidate)
+
+    fun saveApiKey(candidate: CharSequence) = aiController.saveKey(candidate)
+
+    fun removeApiKey() = aiController.removeKey()
+
+    fun selectAiModel(model: String) = aiController.selectModel(model)
+
+    fun setShareFrames(on: Boolean) = aiController.setShareFrames(on)
+
+    fun saveSpendCaps(
+        sessionUsd: String,
+        rollingUsd: String?,
+    ) = aiController.saveCaps(sessionUsd, rollingUsd)
+
     // ---- Chrome ----
 
     fun selectTab(tab: EditorTab) = _state.update { it.copy(tab = tab) }
@@ -515,6 +615,9 @@ class EditorViewModel(
     }
 
     companion object {
+        const val READ_ONLY_MESSAGE =
+            "The timeline is read-only while an AI request or suggestion is open. Accept, reject or cancel it first."
+
         fun blankProject(): Project {
             val empty = Project.empty(id = "project", name = "Untitled project")
             return (CommandExecutor.execute(empty, AddTrack(TrackKind.VIDEO)) as CommandResult.Success).project

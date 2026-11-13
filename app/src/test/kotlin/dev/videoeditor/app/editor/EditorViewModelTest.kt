@@ -1,5 +1,6 @@
 package dev.videoeditor.app.editor
 
+import dev.videoeditor.app.ai.FakeAiPorts
 import dev.videoeditor.timeline.command.ImportMedia
 import dev.videoeditor.timeline.command.MoveClip
 import dev.videoeditor.timeline.host.ExportState
@@ -59,7 +60,8 @@ class EditorViewModelTest {
     fun tearDown() = Dispatchers.resetMain()
 
     private fun TestScope.newVm(): EditorViewModel {
-        val vm = EditorViewModel(preview, export, store, importer, availability, ioDispatcher = dispatcher)
+        val vm =
+            EditorViewModel(preview, export, store, importer, availability, FakeAiPorts(), ioDispatcher = dispatcher)
         advanceUntilIdle()
         return vm
     }

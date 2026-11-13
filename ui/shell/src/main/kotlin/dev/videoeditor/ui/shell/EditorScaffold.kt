@@ -26,9 +26,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -69,7 +71,7 @@ private const val MAX_SIDE_PANE_DP = 480f
 /**
  * Adaptive editor shell. Panes are slots so each can be a stateless composable fed with fake state in tests.
  *
- * - [EditorLayoutMode.SINGLE_PANE] (phones): bottom tabs Media | Preview | Inspector; the timeline is docked under
+ * - [EditorLayoutMode.SINGLE_PANE] (phones): bottom tabs Media | Preview | Inspector (| AI when an [ai] slot is given; it is a full pane); the timeline is docked under
  *   the preview; the Inspector tab opens a modal bottom sheet over the preview.
  * - [EditorLayoutMode.THREE_PANE] (tablets, laptops): media bin | preview | inspector with draggable splitters and the
  *   timeline docked full-width at the bottom.
@@ -92,6 +94,7 @@ fun EditorScaffold(
     inspector: @Composable (Modifier) -> Unit,
     timeline: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
+    ai: (@Composable (Modifier) -> Unit)? = null,
 ) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -118,7 +121,7 @@ fun EditorScaffold(
         bottomBar = {
             if (layoutMode == EditorLayoutMode.SINGLE_PANE) {
                 NavigationBar {
-                    EditorTab.entries.forEach { tab ->
+                    EditorTab.entries.filter { it != EditorTab.AI || ai != null }.forEach { tab ->
                         NavigationBarItem(
                             selected = tab == selectedTab,
                             onClick = { onTabSelected(tab) },
@@ -140,8 +143,19 @@ fun EditorScaffold(
                         preview,
                         inspector,
                         timeline,
+                        ai,
                     )
-                EditorLayoutMode.THREE_PANE -> ThreePane(mediaBin, preview, inspector, timeline)
+                EditorLayoutMode.THREE_PANE -> {
+                    val side: @Composable (Modifier) -> Unit =
+                        if (ai ==
+                            null
+                        ) {
+                            inspector
+                        } else {
+                            { m -> InspectorOrAi(selectedTab, onTabSelected, inspector, ai, m) }
+                        }
+                    ThreePane(mediaBin, preview, side, timeline)
+                }
             }
         }
     }
@@ -152,7 +166,27 @@ private fun tabGlyph(tab: EditorTab): String =
         EditorTab.MEDIA -> "▦"
         EditorTab.PREVIEW -> "▶"
         EditorTab.INSPECTOR -> "☰"
+        EditorTab.AI -> "✦"
     }
+
+/** Tablet/laptop: the inspector pane switches between the inspector and the AI panel. */
+@Composable
+private fun InspectorOrAi(
+    selectedTab: EditorTab,
+    onTabSelected: (EditorTab) -> Unit,
+    inspector: @Composable (Modifier) -> Unit,
+    ai: @Composable (Modifier) -> Unit,
+    modifier: Modifier,
+) {
+    val showAi = selectedTab == EditorTab.AI
+    Column(modifier) {
+        PrimaryTabRow(selectedTabIndex = if (showAi) 1 else 0) {
+            Tab(selected = !showAi, onClick = { onTabSelected(EditorTab.INSPECTOR) }, text = { Text("Inspector") })
+            Tab(selected = showAi, onClick = { onTabSelected(EditorTab.AI) }, text = { Text("AI") })
+        }
+        if (showAi) ai(Modifier.fillMaxWidth().weight(1f)) else inspector(Modifier.fillMaxWidth().weight(1f))
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -163,9 +197,14 @@ private fun SinglePane(
     preview: @Composable (Modifier) -> Unit,
     inspector: @Composable (Modifier) -> Unit,
     timeline: @Composable (Modifier) -> Unit,
+    ai: (@Composable (Modifier) -> Unit)?,
 ) {
     if (selectedTab == EditorTab.MEDIA) {
         mediaBin(Modifier.fillMaxSize())
+        return
+    }
+    if (selectedTab == EditorTab.AI && ai != null) {
+        ai(Modifier.fillMaxSize())
         return
     }
     PreviewWithTimeline(preview, timeline, timelineMaxFraction = 0.5f)

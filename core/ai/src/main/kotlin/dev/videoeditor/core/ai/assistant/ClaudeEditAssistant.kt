@@ -27,8 +27,11 @@ import dev.videoeditor.timeline.schema.CommandResponse
 import dev.videoeditor.timeline.schema.ToolDispatcher
 import dev.videoeditor.timeline.session.EditPreview
 import dev.videoeditor.timeline.session.EditorSession
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 import java.time.Duration
 import java.util.Base64
@@ -169,6 +172,11 @@ class ClaudeEditAssistant internal constructor(
             val response: BetaMessage =
                 try {
                     auth.create(params)
+                } catch (e: CancellationException) {
+                    // The request may already have reached the API and been billed: fail closed and charge
+                    // the reserved worst case so a cancelled call never leaves a reservation pending.
+                    withContext(NonCancellable) { spendGuard.settle(reservation, config.model, null) }
+                    throw e
                 } catch (e: AnthropicAuth.MissingKeyException) {
                     spendGuard.release(reservation)
                     return failed(

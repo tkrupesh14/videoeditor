@@ -9,6 +9,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import dev.videoeditor.app.ai.AndroidAiPorts
 import dev.videoeditor.app.editor.AndroidMediaAvailability
 import dev.videoeditor.app.editor.AndroidMediaImporter
 import dev.videoeditor.app.editor.EditorScreen
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
                         store = FileProjectStore(app),
                         importer = AndroidMediaImporter(app),
                         availability = AndroidMediaAvailability(app),
+                        aiPorts = AndroidAiPorts(app),
                     )
                 }
             }

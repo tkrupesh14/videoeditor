@@ -8,12 +8,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.junit4.createComposeRule
 import com.github.takahirom.roborazzi.captureScreenRoboImage
+import dev.videoeditor.app.ai.AiEditController
 import dev.videoeditor.timeline.model.CaptionClip
 import dev.videoeditor.timeline.model.MediaClip
 import dev.videoeditor.timeline.sample.SampleProjects
+import dev.videoeditor.ui.shell.AiPanel
+import dev.videoeditor.ui.shell.AiPanelActions
+import dev.videoeditor.ui.shell.AiPanelState
+import dev.videoeditor.ui.shell.AiPhase
+import dev.videoeditor.ui.shell.AiSettingsActions
+import dev.videoeditor.ui.shell.AiSettingsState
 import dev.videoeditor.ui.shell.EditorLayoutMode
 import dev.videoeditor.ui.shell.EditorScaffold
 import dev.videoeditor.ui.shell.EditorTab
@@ -26,6 +34,7 @@ import dev.videoeditor.ui.shell.MediaBinState
 import dev.videoeditor.ui.shell.MediaItemUi
 import dev.videoeditor.ui.shell.PreviewPane
 import dev.videoeditor.ui.shell.PreviewPaneState
+import dev.videoeditor.ui.shell.SettingsScreen
 import dev.videoeditor.ui.shell.TopBarActions
 import dev.videoeditor.ui.shell.TopBarState
 import dev.videoeditor.ui.timeline.Timeline
@@ -89,6 +98,7 @@ class ScreenshotTest {
         mode: EditorLayoutMode,
         tab: EditorTab,
         dark: Boolean,
+        ai: (@Composable (Modifier) -> Unit)? = null,
     ) {
         EditorTheme(darkTheme = dark) {
             Surface {
@@ -121,6 +131,7 @@ class ScreenshotTest {
                             Timeline(timelineState, {})
                         }
                     },
+                    ai = ai,
                 )
             }
         }
@@ -155,6 +166,45 @@ class ScreenshotTest {
             EditorTab.PREVIEW,
             dark = false,
         )
+
+    private val aiActions = AiPanelActions({}, {}, {}, {}, {}, {}, {}, {}, {})
+
+    @Test fun phoneAiPanelDark() {
+        val state =
+            AiPanelState(
+                hasKey = true,
+                showCreditsNote = false,
+                sessionCostLine = "This session: about \$0.18 of \$1.00",
+                analysisNote = AiEditController.ANALYSIS_NOTE,
+                phase =
+                    AiPhase.Pending(
+                        title = "Claude's suggestion",
+                        summary = "Trimmed the long pause after the intro and added a title caption.",
+                        edits = listOf("Cut 0:04.0 to 0:05.0", "Add caption \"Beach day\" at 0:00.0"),
+                        costLine = "This request: about \$0.04",
+                    ),
+            )
+        rule.setContent {
+            Editor(EditorLayoutMode.SINGLE_PANE, EditorTab.AI, dark = true, ai = { m -> AiPanel(state, aiActions, m) })
+        }
+        rule.waitForIdle()
+        captureScreenRoboImage("../docs/screenshots/phone-ai-panel-dark.png")
+    }
+
+    @Test fun phoneAiSettingsNoKeyDark() {
+        val state =
+            AiSettingsState(
+                keyStatus = "No key saved",
+                models = listOf("claude-opus-5-5", "claude-haiku-5-5", "claude-sonnet-5-5"),
+                model = "claude-opus-5-5",
+                sessionSpentLine = "This session: about \$0.00 of \$1.00",
+                rollingSpentLine = "Last 30 days: about \$0.00 of \$20.00",
+            )
+        val actions = AiSettingsActions({ null }, {}, {}, { null }, {}, {}, { _, _ -> }, {})
+        rule.setContent { EditorTheme(darkTheme = true) { SettingsScreen(state, actions, onBack = {}) } }
+        rule.waitForIdle()
+        captureScreenRoboImage("../docs/screenshots/phone-ai-settings-no-key-dark.png")
+    }
 
     @Test
     @Config(sdk = [35], qualifiers = "w1280dp-h800dp-xhdpi")

@@ -22,6 +22,7 @@ enum class EditorTab(
     MEDIA("Media"),
     PREVIEW("Preview"),
     INSPECTOR("Inspector"),
+    AI("AI"),
 }
 
 @Immutable

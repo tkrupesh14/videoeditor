@@ -305,6 +305,24 @@ class ClaudeEditAssistantTest {
         }
 
     @Test
+    fun `cancelling a request in flight charges the worst case and leaves nothing reserved`() =
+        runBlocking {
+            mock.server.enqueue(
+                okhttp3.mockwebserver
+                    .MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(message(listOf(text("late")), "end_turn"))
+                    .setHeadersDelay(1, java.util.concurrent.TimeUnit.SECONDS),
+            )
+            val result = kotlinx.coroutines.withTimeoutOrNull(200) { mock.assistant().suggest(session(), "x") }
+            assertNull(result)
+            val snap = mock.guard.snapshot.value
+            assertEquals(MicroUsd.ZERO, snap.reserved, "no reservation may stay pending after cancel")
+            assertTrue(snap.sessionSpent > MicroUsd.ZERO, "a possibly billed request is charged (fail closed)")
+        }
+
+    @Test
     fun `usage settles the ledger with real token counts`() =
         runBlocking {
             mock.enqueueJson(

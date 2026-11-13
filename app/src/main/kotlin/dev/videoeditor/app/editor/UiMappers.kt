@@ -25,8 +25,8 @@ fun EditorUiState.toTimelineState(): TimelineUiState =
 fun EditorUiState.toTopBarState(): TopBarState =
     TopBarState(
         title = project.name,
-        canUndo = canUndo,
-        canRedo = canRedo,
+        canUndo = canUndo && !aiLocked,
+        canRedo = canRedo && !aiLocked,
         undoLabel = undoLabel,
         redoLabel = redoLabel,
         canExport = loaded && export == null,

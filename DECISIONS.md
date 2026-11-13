@@ -31,3 +31,10 @@ Format: date, decision, why. Newest at bottom.
 - Tools exposed to Claude exclude `import_media` (file paths) and `batch` (recursive schema not allowed in strict mode). Length/number limits stripped from strict schemas; the engine still enforces them and returns `is_error` results.
 - Server-side fallbacks on by default, skipped for Haiku 5.5 (returns 400). Unknown fallback model price -> charge the full reservation.
 - Spend estimate is local (no count_tokens), so it may refuse slightly early near the cap.
+
+## 2026-11-14 Phase 5b-2 (Android AI wiring)
+- AI is a 4th phone bottom tab ("AI") and an Inspector|AI tab row on tablet/laptop.
+- While a request runs or a suggestion is pending, every edit entry point refuses (timeline shows the preview). Accept = session.commitPreview (one undo step).
+- Transcript is a stub (NoTranscriptAvailable), shown in the UI. Scene detection resolution is limited to sync-frame spacing.
+- Cancelling an in-flight request charges the reserved worst case (it may have been billed) instead of leaking a pending reservation.
+- Known gaps: key field lacks IME no-personalized-learning/autofill exclusion (no Compose API); export not blocked during a pending suggestion (exports the committed project).
