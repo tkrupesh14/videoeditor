@@ -18,7 +18,7 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | androidx.core:core-ktx:1.19.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/core/core-ktx/1.19.1` POM | app, runtime | none |
 | androidx.activity:activity-compose:1.13.0 | "The Apache Software License, Version 2.0" | Google Maven `androidx/activity/activity-compose/1.13.0` POM | ui:shell, ui:timeline, runtime | none |
 | androidx.lifecycle:lifecycle-runtime-compose:2.11.0 | "The Apache Software License, Version 2.0" | Google Maven `androidx/lifecycle/lifecycle-runtime-compose/2.11.0` POM | ui:shell, ui:timeline, runtime | none |
-| androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0 | "The Apache Software License, Version 2.0" | Google Maven `androidx/lifecycle/lifecycle-viewmodel-compose/2.11.0` POM | ui:shell, ui:timeline, runtime | none |
+| androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0 | "The Apache Software License, Version 2.0" | Google Maven `androidx/lifecycle/lifecycle-viewmodel-compose/2.11.0` POM | ui:shell, ui:timeline, app, runtime | none |
 | androidx.compose:compose-bom:2026.09.00 | "The Apache Software License, Version 2.0" | Google Maven `androidx/compose/compose-bom/2026.09.00` POM | app, ui:shell, ui:timeline, BOM only | none |
 | androidx.compose.ui:ui (BOM-resolved 1.12.1) | "The Apache Software License, Version 2.0" | Google Maven `androidx/compose/ui/ui/1.12.1` POM | app, ui:shell, ui:timeline, runtime | none |
 | androidx.compose.foundation:foundation (BOM-resolved 1.12.1) | "The Apache Software License, Version 2.0" | Google Maven `androidx/compose/foundation/foundation/1.12.1` POM | app, ui:shell, ui:timeline, runtime | none |
@@ -33,12 +33,11 @@ Usage key: **runtime** = shipped in the app or in a module the app depends on; *
 | androidx.media3:media3-exoplayer:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-exoplayer/1.11.1` POM | core:media, runtime | none |
 | androidx.media3:media3-transformer:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-transformer/1.11.1` POM | core:media, runtime | none |
 | androidx.media3:media3-effect:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-effect/1.11.1` POM | core:media, core:render, runtime | none |
-| androidx.media3:media3-ui:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-ui/1.11.1` POM | core:media, runtime | none |
-| androidx.security:security-crypto:1.1.0 | "The Apache Software License, Version 2.0" | Google Maven `androidx/security/security-crypto/1.1.0` POM | catalog-only (unused; catalog comment says deprecated upstream) | none |
+| androidx.media3:media3-ui:1.11.1 | "The Apache Software License, Version 2.0" | Google Maven `androidx/media3/media3-ui/1.11.1` POM | core:media, app, runtime | none |
 | org.jetbrains.kotlinx:kotlinx-serialization-json:1.13.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-serialization-json/1.13.0` POM | core:timeline, core:ai, core:mcp, runtime | none |
 | org.jetbrains.kotlinx:kotlinx-coroutines-core:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-core/1.11.0` POM | core:timeline, core:ai, core:mcp, runtime | none |
 | org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-android/1.11.0` POM | core:media, core:render, ui:shell, ui:timeline, runtime | none |
-| org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-test/1.11.0` POM | catalog-only (unused) | none |
+| org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0 | "Apache-2.0" | Maven Central `org/jetbrains/kotlinx/kotlinx-coroutines-test/1.11.0` POM | app, testImplementation | none |
 | io.ktor:ktor-client-core:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-core/3.6.1` POM | core:ai, runtime | none |
 | io.ktor:ktor-client-cio:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-cio/3.6.1` POM | core:ai, runtime | none |
 | io.ktor:ktor-client-content-negotiation:3.6.1 | "The Apache Software License, Version 2.0" | Maven Central `io/ktor/ktor-client-content-negotiation/3.6.1` POM | core:ai, runtime | none |
@@ -98,8 +97,8 @@ The Gradle run (`:app:dependencies --configuration releaseRuntimeClasspath`) res
 
 - The MCP kotlin-sdk license statements conflict: POM "MIT License" versus the repo's own design doc claiming Apache-2.0 for `main`. See item 1.
 - The anthropic-java SDK is Apache-2.0 in both its POM and its GitHub LICENSE. It is not MIT.
-- `androidx.security:security-crypto` is catalog-only and unused by any module. Its catalog comment says it is deprecated upstream.
-- Four catalog entries are unused by any module: `androidx-compose-ui-tooling-preview`, `ktor-client-okhttp`, `kotlinx-coroutines-test`, `androidx-security-crypto`.
+- `androidx.security:security-crypto` (deprecated upstream, unused) was removed from the catalog in Phase 4.
+- Two catalog entries are unused by any module: `androidx-compose-ui-tooling-preview`, `ktor-client-okhttp`.
 - kotlin-stdlib resolves to 14 different versions in the release tree (1.6.21 to 2.4.21). This is a version-alignment issue, not a license issue.
 - No ffmpeg or other GPL-family codec artifact is in the tree. Media3 is Apache-2.0 and uses the platform codecs.
 

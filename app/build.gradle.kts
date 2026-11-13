@@ -36,7 +36,12 @@ dependencies {
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.window.size)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:timeline"))
     implementation(project(":core:ai"))
@@ -46,4 +51,5 @@ dependencies {
     implementation(project(":ui:timeline"))
     debugImplementation(libs.androidx.compose.ui.tooling)
     testImplementation(libs.junit4)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
