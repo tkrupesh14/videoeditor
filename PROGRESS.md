@@ -21,7 +21,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 - (done) Haiku: LICENSE_AUDIT.md — clean, no copyleft
 ## Queue (strictly one task at a time)
 1. (done) key store + spend guard
-2. Sonnet: remaining property tests (PROPERTIES_TODO.md) + fix trim-start rounding gap (see DECISIONS)
+2. (done) property tests + trim rounding fix
 3. Opus (medium): Phase 3 Media3 preview/export
 4. Opus (medium): Phase 4 UI shell, then Sonnet polish
 5. Opus (medium): :core:ai Messages API client + preview diff UI

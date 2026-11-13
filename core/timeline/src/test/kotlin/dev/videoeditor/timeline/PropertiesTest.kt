@@ -1,5 +1,6 @@
 package dev.videoeditor.timeline
 
+import dev.videoeditor.timeline.command.AddClip
 import dev.videoeditor.timeline.command.ApplyCuts
 import dev.videoeditor.timeline.command.Batch
 import dev.videoeditor.timeline.command.ClipEdge
@@ -25,11 +26,13 @@ import dev.videoeditor.timeline.model.MediaClip
 import dev.videoeditor.timeline.model.Project
 import dev.videoeditor.timeline.model.TimeMath
 import dev.videoeditor.timeline.model.TimeRange
+import dev.videoeditor.timeline.model.TrackKind
 import dev.videoeditor.timeline.model.endUs
 import dev.videoeditor.timeline.query.EditLimits
 import dev.videoeditor.timeline.query.SnapKind
 import dev.videoeditor.timeline.query.SnapPoint
 import dev.videoeditor.timeline.query.Snapping
+import dev.videoeditor.timeline.schema.ToolRegistry
 import dev.videoeditor.timeline.session.EditorSession
 import dev.videoeditor.timeline.validate.ProjectValidator
 import io.kotest.common.ExperimentalKotest
@@ -40,6 +43,8 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.long
 import io.kotest.property.checkAll
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -358,18 +363,11 @@ class PropertiesTest {
                         },
                     ),
                 )
-            if (backRes is CommandResult.Failure) {
-                // Floor rounding can put the restored source in at -1 us when the clip started at source 0.
-                assertTrue(
-                    backRes.error is CommandError.SourceOutOfRange && (c as MediaClip).sourceInUs == 0L,
-                    "$backRes",
-                )
-                return@prop
-            }
+            assertTrue(backRes is CommandResult.Success, "$backRes")
             val b = (backRes as CommandResult.Success).project.clipById(c.id)
             assertEquals(c.startUs, b.startUs)
             assertEquals(c.durationUs, b.durationUs)
-            if (c is MediaClip) assertTrue(Math.abs((b as MediaClip).sourceInUs - c.sourceInUs) <= 1)
+            if (c is MediaClip) assertEquals(c.sourceInUs, (b as MediaClip).sourceInUs)
         }
 
     @Test
@@ -385,6 +383,75 @@ class PropertiesTest {
                     CommandExecutor.execute(p, TrimClip(c.id, edge, to, ripple)) is CommandResult.Failure,
                     "$edge $ripple to $to",
                 )
+            }
+        }
+
+    private fun compatible(
+        kind: TrackKind,
+        a: dev.videoeditor.timeline.model.MediaAsset,
+    ) = when (kind) {
+        TrackKind.VIDEO, TrackKind.OVERLAY -> a.hasVideo
+        TrackKind.AUDIO -> a.hasAudio
+        TrackKind.CAPTION -> false
+    }
+
+    @Test
+    fun `P15 canPlace agrees with AddClip and MoveClip`() {
+        var added = 0
+        var moved = 0
+        prop { p, r ->
+            // AddClip: speed 1.0, source range [0, d) so the duration equals the probed duration.
+            val track = p.tracks.filter { it.kind != TrackKind.CAPTION }.randomOrNull(r)
+            val asset = track?.let { t -> p.assets.filter { compatible(t.kind, it) }.randomOrNull(r) }
+            if (track != null && asset != null) {
+                val d = r.nextLong(MIN, asset.durationUs + 1)
+                val start = Arbs.time(r, p).coerceAtLeast(0)
+                val res = CommandExecutor.execute(p, AddClip(track.id, asset.id, start, 0, d))
+                val can = EditLimits.canPlace(p, track.id, start, d)
+                when {
+                    res is CommandResult.Success -> assertTrue(can, "added but !canPlace $start $d")
+                    (res as CommandResult.Failure).error is CommandError.Overlap ->
+                        assertFalse(
+                            can,
+                            "overlap but canPlace",
+                        )
+                    else -> assertFalse(can, "$res but canPlace")
+                }
+                if (can) added++
+            }
+            // MoveClip of one clip within or across same-kind tracks.
+            val c = anyClip(p, r) ?: return@prop
+            val from = p.trackOf(c.id)!!
+            val to = p.tracks.filter { it.kind == from.kind }.random(r)
+            val toStart = Arbs.time(r, p).coerceAtLeast(0)
+            val res = CommandExecutor.execute(p, MoveClip(listOf(c.id), toStart, to.id))
+            val can = EditLimits.canPlace(p, to.id, toStart, c.durationUs, setOf(c.id))
+            when {
+                res is CommandResult.Success -> assertTrue(can, "moved but !canPlace")
+                (res as CommandResult.Failure).error is CommandError.Overlap -> assertFalse(can, "overlap but canPlace")
+                else -> assertFalse(can, "$res but canPlace")
+            }
+            if (can) moved++
+        }
+        assertTrue(added > 20 && moved > 20, "too few placeable cases: $added/$moved")
+    }
+
+    @Test
+    fun `P21 every generated command validates against its tool schema`() =
+        prop { p, r ->
+            repeat(5) {
+                val c = Arbs.command(r, p)
+                val encoded = TimelineJson.encodeCommand(c)
+                val spec = ToolRegistry.all.single { it.commandType == c.typeName }
+                val args = JsonObject(encoded.filterKeys { it != "type" })
+                assertEquals(
+                    emptyList<String>(),
+                    TestSchemaValidator.validate(spec.inputSchema, args),
+                    "$spec $encoded",
+                )
+                assertEquals(JsonPrimitive(c.typeName), encoded["type"])
+                val required = (spec.inputSchema["required"] as? kotlinx.serialization.json.JsonArray).orEmpty()
+                for (k in required) assertTrue((k as JsonPrimitive).content in args, "required $k absent in $encoded")
             }
         }
 

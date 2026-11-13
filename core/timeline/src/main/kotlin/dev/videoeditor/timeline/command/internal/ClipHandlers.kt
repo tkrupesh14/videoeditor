@@ -133,11 +133,12 @@ internal fun trimClip(
     if (newDuration < MIN) reject(CommandError.ClipTooShort(clip.id, newDuration, MIN))
     if (clip is MediaClip) {
         val k = clip.speedCenti
+        // Symmetric (toward-zero) rounding of the source delta so a START trim and its inverse cancel exactly
+        // and never undershoot source 0; the range check below still guarantees the asset bounds.
         val sIn =
-            if (c.edge ==
-                ClipEdge.START
-            ) {
-                clip.sourceInUs + Math.floorDiv((c.toUs - s) * k, 100L)
+            if (c.edge == ClipEdge.START) {
+                val d = c.toUs - s
+                clip.sourceInUs + if (d >= 0) d * k / 100 else -((-d) * k / 100)
             } else {
                 clip.sourceInUs
             }

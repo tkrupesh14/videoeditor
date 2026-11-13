@@ -1413,3 +1413,7 @@ JSON, schema, tools:
 - Still-image assets (unbounded source duration), track mute/lock/hide, `RemoveAsset`, linked audio/video clips, non-ripple "lift" cuts, a persisted command log.
 
 Each of these adds a schema version and a `Migration`; none requires changing the execute, session or snapshot design.
+
+## Amendment (2026-11-13): START-edge trim rounding
+
+Exception to "every timeline→source conversion floors": a START-edge trim computes the source delta by rounding **toward zero** instead of flooring, so a trim and its exact inverse cancel at any speed. Example: at speed 3.33, flooring gave +3 µs forward and −4 µs back, leaving sourceIn at −1 µs. `sourceIn` is still clamped to be ≥ 0 and the asset-range check is unchanged. The regression test is `CommandExamplesTest` (Trim round-trip at speeds 1.0, 3.33, 0.5), and property P13 asserts `sourceInUs` is restored exactly.

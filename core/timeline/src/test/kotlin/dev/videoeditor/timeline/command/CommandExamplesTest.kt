@@ -138,6 +138,17 @@ class CommandExamplesTest {
 
     @Nested
     inner class Trim {
+        @Test
+        fun `start trim and trim back at source 0 restores the clip exactly`() {
+            for (speed in listOf(1.0, 3.33, 0.5)) {
+                val orig = media("clip_10", 1 * S, 2 * S, sourceIn = 0, speed = speed)
+                val p = fixture(video = listOf(orig))
+                val there = ok(p, TrimClip("clip_10", ClipEdge.START, 1 * S + 1)).project
+                val back = ok(there, TrimClip("clip_10", ClipEdge.START, 1 * S)).project
+                assertEquals(orig, back.media("clip_10"), "speed $speed")
+            }
+        }
+
         // clip_10 [1 s, 3 s) source 5 s; clip_11 [4 s, 6 s); clip_12 [7 s, 8 s); earlier clip_9 [0, 0.5 s)
         private val p =
             fixture(

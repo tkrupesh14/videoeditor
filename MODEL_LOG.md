@@ -12,3 +12,4 @@
 | 8 | Key-store builder stopped again, queued | — | Owner: run tasks one at a time | queued after timeline |
 | 9 | Finish :core:timeline (session/undo, snap, JSON, schemas, dispatcher, 65 tests) | Opus 5.5 (builder, medium) | Main implementation | done; 65 tests pass (43 example, 22 property), re-verified by orchestrator |
 | 10 | Finish key store + spend guard (:core:ai SecretString/ApiKeyFormat/LedgerSpendGuard; :app AndroidKeystoreApiKeyStore, ledger store, backup exclusion) | Opus 5.5 (builder, medium) | Security-critical implementation | done; 75 core:ai + 18 app tests pass (re-verified). Keystore cipher device-untested |
+| 11 | Property tests P15/P21 + trim-start rounding fix | Sonnet 5.5 (worker) | Repetitive tests + small fix | done first try; 67 tests; orchestrator confirmed the regression test fails on old code |
