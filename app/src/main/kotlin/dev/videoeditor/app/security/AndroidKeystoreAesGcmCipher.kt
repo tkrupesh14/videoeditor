@@ -16,11 +16,12 @@ import javax.crypto.spec.GCMParameterSpec
  */
 class AndroidKeystoreAesGcmCipher(
     private val alias: String = ALIAS,
+    private val aad: ByteArray = AAD,
 ) : ApiKeyCipher {
     override fun encrypt(plaintext: ByteArray): ApiKeyCipher.Sealed {
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.ENCRYPT_MODE, existingKey() ?: generateKey())
-        cipher.updateAAD(AAD)
+        cipher.updateAAD(aad)
         val out = cipher.doFinal(plaintext)
         return ApiKeyCipher.Sealed(cipher.iv, out)
     }
@@ -29,7 +30,7 @@ class AndroidKeystoreAesGcmCipher(
         val key = existingKey() ?: throw KeyMissingException()
         val cipher = Cipher.getInstance(TRANSFORMATION)
         cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, sealed.iv))
-        cipher.updateAAD(AAD)
+        cipher.updateAAD(aad)
         return cipher.doFinal(sealed.ciphertextAndTag)
     }
 
@@ -76,5 +77,9 @@ class AndroidKeystoreAesGcmCipher(
         private const val KEY_BITS = 256
         private const val TAG_BITS = 128
         private val AAD = "dev.videoeditor.apikey|v1".toByteArray(Charsets.UTF_8)
+
+        /** Bridge client verifiers (docs/design/security.md B4). */
+        const val BRIDGE_ALIAS = "dev.videoeditor.bridge.v1"
+        val BRIDGE_AAD = "bridge-verifier|v1".toByteArray(Charsets.UTF_8)
     }
 }

@@ -38,3 +38,11 @@ Format: date, decision, why. Newest at bottom.
 - Transcript is a stub (NoTranscriptAvailable), shown in the UI. Scene detection resolution is limited to sync-frame spacing.
 - Cancelling an in-flight request charges the reserved worst case (it may have been billed) instead of leaking a pending reservation.
 - Known gaps: key field lacks IME no-personalized-learning/autofill exclusion (no Compose API); export not blocked during a pending suggestion (exports the committed project).
+
+## 2026-11-14 Phase 6 (MCP)
+- Hand-written JSON-RPC 2.0 stdio MCP server instead of io.modelcontextprotocol:kotlin-sdk: SDK 0.16 tops out at protocol 2025-11-25, would pull ktor/kotlin-logging, and ~300 tested lines suffice. Negotiates 2024-11-05..2025-11-25; accepts 2026-07-28-style stateless requests (exact field names unverified against spec).
+- Tool arguments use the ToolRegistry names in microseconds (clipIds, atUs), not the *_ms names sketched in security.md B7.
+- No IP listener at all (the design's debug-only TCP fallback was not built). Abstract socket accepts uid 2000 (adb shell) or the app's own uid.
+- "Allow MCP control" is off at every cold start; the bridge only listens while the activity is started.
+- Verified end to end: real Claude Code (claude -p, Haiku, --mcp-config) listed clips and split clip_4 in offline mode; project file changed 3 -> 4 clips.
+- Not built: QR rendering (pair --uri works), visible 60 s countdown, MCP undo tool, bridge transcript (UNSUPPORTED).

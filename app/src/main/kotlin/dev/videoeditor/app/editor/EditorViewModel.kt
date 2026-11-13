@@ -5,6 +5,11 @@ import androidx.lifecycle.viewModelScope
 import dev.videoeditor.app.ai.AiEditController
 import dev.videoeditor.app.ai.AiPorts
 import dev.videoeditor.app.ai.AiState
+import dev.videoeditor.app.mcp.McpBridgeController
+import dev.videoeditor.app.mcp.McpPorts
+import dev.videoeditor.core.mcp.bridge.ExportGate
+import dev.videoeditor.core.mcp.bridge.RemoteExportState
+import dev.videoeditor.core.mcp.bridge.SessionBridgeSink
 import dev.videoeditor.timeline.command.AddCaption
 import dev.videoeditor.timeline.command.AddClip
 import dev.videoeditor.timeline.command.AddTrack
@@ -32,6 +37,7 @@ import dev.videoeditor.ui.shell.ClipProperty
 import dev.videoeditor.ui.shell.EditorShortcut
 import dev.videoeditor.ui.shell.EditorTab
 import dev.videoeditor.ui.shell.ExportDialogState
+import dev.videoeditor.ui.shell.McpUiState
 import dev.videoeditor.ui.timeline.TimelineEdits
 import dev.videoeditor.ui.timeline.TimelineEvent
 import dev.videoeditor.ui.timeline.TimelineZoom
@@ -51,6 +57,8 @@ import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /** Everything the editor screen renders. */
 data class EditorUiState(
@@ -72,6 +80,8 @@ data class EditorUiState(
     val importing: Boolean = false,
     val export: ExportDialogState? = null,
     val showSettings: Boolean = false,
+    /** The "Claude Code (MCP)" screen is open. */
+    val showMcp: Boolean = false,
     val tab: EditorTab = EditorTab.PREVIEW,
     val message: String? = null,
     /** True while an AI request runs or a suggestion is pending: the timeline is read-only. */
@@ -94,6 +104,8 @@ class EditorViewModel(
     aiPorts: AiPorts,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val autosaveDebounceMs: Long = 500,
+    /** Null disables the MCP bridge (tests, or a platform without it). */
+    mcpPorts: McpPorts? = null,
 ) : ViewModel() {
     private val session = EditorSession(blankProject())
     private val sessionState = MutableStateFlow(session.state)
@@ -119,9 +131,40 @@ class EditorViewModel(
     /** AI panel and settings state. */
     val ai: StateFlow<AiState> = aiController.state
 
+    // ---- MCP bridge (docs/design/security.md Part B) ----
+
+    private val exportGate = ExportGate()
+    private var remoteExportId: String? = null
+
+    private val mcpController: McpBridgeController? =
+        mcpPorts?.let { ports ->
+            McpBridgeController(
+                scope = viewModelScope,
+                ports = ports,
+                sink =
+                    SessionBridgeSink(
+                        session = session,
+                        readOnlyReason = { if (aiController.locked) MCP_READ_ONLY_MESSAGE else null },
+                        exportGate = exportGate,
+                        sessionContext = Dispatchers.Main.immediate,
+                    ),
+                exportGate = exportGate,
+                io = ioDispatcher,
+                onApplied = { _, label -> showMessage("Claude: $label") },
+            )
+        }
+
+    /** MCP chip, pairing and client list. */
+    val mcp: StateFlow<McpUiState> = mcpController?.ui ?: MutableStateFlow(McpUiState()).asStateFlow()
+
     init {
         listener = session.addListener { onSessionChanged(it) }
         viewModelScope.launch { loadInitial() }
+        if (mcpController != null) {
+            viewModelScope.launch {
+                _state.map { it.export }.distinctUntilChanged().collect { reportRemoteExport(it) }
+            }
+        }
         viewModelScope.launch {
             var wasPlaying = false
             preview.state.collect { p ->
@@ -212,6 +255,23 @@ class EditorViewModel(
 
     private fun onSessionChanged(s: EditorState) {
         sessionState.value = s
+        mcpController?.takeIf { it.hasSessions && !s.transactionOpen }?.let { c ->
+            val origin =
+                session.undoHistory
+                    .lastOrNull()
+                    ?.takeIf { it.after === s.project }
+                    ?.origin
+                    ?.name
+                    ?.lowercase() ?: "user"
+            c.broadcast(
+                "project.changed",
+                buildJsonObject {
+                    put("projectId", s.project.id)
+                    put("revision", s.revision)
+                    put("origin", origin)
+                },
+            )
+        }
         _state.update { ui ->
             ui.copy(
                 project = aiController.state.value.pendingProject ?: s.project,
@@ -548,6 +608,88 @@ class EditorViewModel(
         }
     }
 
+    // ---- MCP ----
+
+    fun openMcp() = _state.update { it.copy(showMcp = true) }
+
+    fun closeMcp() {
+        mcpController?.cancelPairing()
+        _state.update { it.copy(showMcp = false) }
+    }
+
+    fun mcpOnStart() {
+        runCatching { mcpController?.onStart() }.onFailure { showMessage("MCP bridge could not start: ${it.message}") }
+    }
+
+    fun mcpOnStop() = mcpController?.onStop()
+
+    fun mcpSetAllowed(on: Boolean) {
+        runCatching {
+            mcpController?.setAllowed(
+                on,
+            )
+        }.onFailure { showMessage("MCP bridge could not start: ${it.message}") }
+    }
+
+    /** Kill switch. */
+    fun mcpStop() {
+        mcpController?.stop()
+        showMessage("Claude disconnected; MCP control is off")
+    }
+
+    fun mcpBeginPairing() = mcpController?.beginPairing()
+
+    fun mcpCancelPairing() = mcpController?.cancelPairing()
+
+    fun mcpAnswerPairing(
+        requestId: String,
+        allow: Boolean,
+        scopes: Set<String>,
+    ) = mcpController?.answerPairing(requestId, allow, scopes)
+
+    fun mcpRevoke(clientId: String) = mcpController?.revoke(clientId)
+
+    fun mcpRevokeAll() = mcpController?.revokeAll()
+
+    /** The on-phone answer to a remote export request. Nothing is exported without [allow]. */
+    fun mcpAnswerExport(
+        exportId: String,
+        allow: Boolean,
+    ) {
+        exportGate.answer(exportId, allow) ?: return
+        if (_state.value.export is ExportDialogState.Running) {
+            exportGate.update(
+                exportId,
+                RemoteExportState.FAILED,
+                error = "Another export is already running on the phone",
+            )
+            return
+        }
+        startExport()
+        if (_state.value.export is ExportDialogState.Running) {
+            remoteExportId = exportId
+        } else {
+            exportGate.update(exportId, RemoteExportState.FAILED, error = "The export could not start on the phone")
+        }
+    }
+
+    private fun reportRemoteExport(d: ExportDialogState?) {
+        val id = remoteExportId ?: return
+        when (d) {
+            is ExportDialogState.Running -> exportGate.update(id, RemoteExportState.RUNNING, d.fraction)
+            is ExportDialogState.Done -> exportGate.update(id, RemoteExportState.DONE, 1.0)
+            is ExportDialogState.Failed -> exportGate.update(id, RemoteExportState.FAILED, error = d.message)
+            ExportDialogState.Cancelled ->
+                exportGate.update(
+                    id,
+                    RemoteExportState.FAILED,
+                    error = "Cancelled on the phone",
+                )
+            null -> Unit
+        }
+        if (d != null && d !is ExportDialogState.Running) remoteExportId = null
+    }
+
     fun dismissExport() {
         if (_state.value.export !is ExportDialogState.Running) _state.update { it.copy(export = null) }
     }
@@ -606,6 +748,7 @@ class EditorViewModel(
     private fun showMessage(text: String) = _state.update { it.copy(message = text) }
 
     override fun onCleared() {
+        mcpController?.stop()
         listener.close()
         if (session.state.transactionOpen) session.commitTransaction()
         // Save synchronously-ish on the way out so the last edit is not lost to the debounce.
@@ -615,6 +758,10 @@ class EditorViewModel(
     }
 
     companion object {
+        const val MCP_READ_ONLY_MESSAGE =
+            "An AI suggestion is pending or running on the phone, so the timeline is read-only. Ask the user to " +
+                "accept or reject it in the app, then read the project again."
+
         const val READ_ONLY_MESSAGE =
             "The timeline is read-only while an AI request or suggestion is open. Accept, reject or cancel it first."
 

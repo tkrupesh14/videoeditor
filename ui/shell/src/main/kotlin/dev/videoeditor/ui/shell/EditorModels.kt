@@ -44,6 +44,8 @@ class TopBarActions(
     val onNewProject: () -> Unit,
     val onOpenSettings: () -> Unit,
     val onAddCaption: () -> Unit,
+    /** Null hides the "Claude Code (MCP)" menu item. */
+    val onOpenMcp: (() -> Unit)? = null,
 )
 
 @Immutable

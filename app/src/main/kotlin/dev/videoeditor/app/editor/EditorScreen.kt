@@ -49,6 +49,14 @@ import dev.videoeditor.ui.shell.EditorTab
 import dev.videoeditor.ui.shell.ExportDialog
 import dev.videoeditor.ui.shell.InspectorActions
 import dev.videoeditor.ui.shell.InspectorPane
+import dev.videoeditor.ui.shell.McpActions
+import dev.videoeditor.ui.shell.McpApprovalDialog
+import dev.videoeditor.ui.shell.McpExportConfirmDialog
+import dev.videoeditor.ui.shell.McpPairingUi
+import dev.videoeditor.ui.shell.McpScreen
+import dev.videoeditor.ui.shell.McpStatus
+import dev.videoeditor.ui.shell.McpStatusBanner
+import dev.videoeditor.ui.shell.McpUiState
 import dev.videoeditor.ui.shell.MediaBinPane
 import dev.videoeditor.ui.shell.PreviewPane
 import dev.videoeditor.ui.shell.SettingsScreen
@@ -66,6 +74,7 @@ fun EditorScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val ai by vm.ai.collectAsStateWithLifecycle()
+    val mcp by vm.mcp.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
     val thumbnails = remember { ThumbnailProvider(context) }
@@ -88,6 +97,27 @@ fun EditorScreen(
         if (ai.clipboardClearRequests > 0) clearClipboard(context)
     }
 
+    KeepScreenOn(mcp.status is McpStatus.Connected)
+    McpDialogs(mcp, vm)
+    if (state.showMcp) {
+        BackHandler { vm.closeMcp() }
+        SecureWindow() // the pairing code is on screen
+        val mcpActions =
+            remember(vm) {
+                McpActions(
+                    onAllowChanged = vm::mcpSetAllowed,
+                    onStop = vm::mcpStop,
+                    onBeginPairing = { vm.mcpBeginPairing() },
+                    onCancelPairing = { vm.mcpCancelPairing() },
+                    onAnswerPairing = { id, allow, scopes -> vm.mcpAnswerPairing(id, allow, scopes) },
+                    onRevoke = { vm.mcpRevoke(it) },
+                    onRevokeAll = { vm.mcpRevokeAll() },
+                    onAnswerExport = vm::mcpAnswerExport,
+                )
+            }
+        McpScreen(mcp, mcpActions, onBack = vm::closeMcp)
+        return
+    }
     if (state.showSettings) {
         BackHandler { vm.closeSettings() }
         SecureWindow()
@@ -136,6 +166,7 @@ fun EditorScreen(
                 onNewProject = vm::newProject,
                 onOpenSettings = vm::openSettings,
                 onAddCaption = vm::addCaptionAtPlayhead,
+                onOpenMcp = if (vm.mcp.value.available) vm::openMcp else null,
             )
         }
     val inspectorActions =
@@ -187,6 +218,7 @@ fun EditorScreen(
                 }
             },
             ai = { m -> AiPanel(ai.panel, aiActions, m) },
+            banner = { McpStatusBanner(mcp.status, onStop = vm::mcpStop, onOpen = vm::openMcp) },
         )
         state.export?.let { ExportDialog(it, onCancel = vm::cancelExport, onDismiss = vm::dismissExport) }
     }
@@ -236,6 +268,29 @@ private fun BoxScope.ThumbnailClipContent(
         }
     }
     DefaultClipContent(block)
+}
+
+/** The pairing approval and remote-export confirmation, shown over whatever screen is open. */
+@Composable
+private fun McpDialogs(
+    mcp: McpUiState,
+    vm: EditorViewModel,
+) {
+    (mcp.pairing as? McpPairingUi.AwaitingApproval)?.let { req ->
+        McpApprovalDialog(req) { allow, scopes -> vm.mcpAnswerPairing(req.requestId, allow, scopes) }
+    }
+    mcp.exportPrompt?.let { p -> McpExportConfirmDialog(p) { allow -> vm.mcpAnswerExport(p.exportId, allow) } }
+}
+
+/** FLAG_KEEP_SCREEN_ON while a Claude client is connected (B2.1). */
+@Composable
+private fun KeepScreenOn(on: Boolean) {
+    val context = LocalContext.current
+    DisposableEffect(context, on) {
+        val window = context.findActivity()?.window
+        if (on) window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose { if (on) window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
 }
 
 /** FLAG_SECURE while composed (the API key screen): blocks screenshots, recording, casting and the recents thumbnail. */

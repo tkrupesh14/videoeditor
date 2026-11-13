@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(project(":core:timeline"))
     implementation(project(":core:ai"))
+    implementation(project(":core:mcp"))
+    implementation(libs.kotlinx.serialization.json)
     implementation(project(":core:render"))
     implementation(project(":core:media"))
     implementation(project(":ui:shell"))

@@ -9,20 +9,30 @@ kotlin {
 }
 
 dependencies {
+    api(project(":core:timeline"))
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.ktor.server.core)
-    implementation(libs.ktor.server.cio)
-    implementation(libs.ktor.server.websockets)
     testImplementation(platform(libs.junit5.bom))
     testImplementation(libs.junit5.jupiter)
+    testImplementation(libs.kotlinx.coroutines.test)
     testRuntimeOnly(libs.junit5.platform.launcher)
+}
+
+application {
+    // `./gradlew :core:mcp:installDist` -> core/mcp/build/install/vedit-mcp/bin/vedit-mcp
+    applicationName = "vedit-mcp"
+    mainClass.set("dev.videoeditor.core.mcp.MainKt")
 }
 
 tasks.test {
     useJUnitPlatform()
-}
-
-application {
-    mainClass.set("dev.videoeditor.core.mcp.MainKt")
+    // The end-to-end test starts the real CLI as a child process from the installed distribution.
+    dependsOn(tasks.named("installDist"))
+    systemProperty(
+        "veditMcpLauncher",
+        layout.buildDirectory
+            .file("install/vedit-mcp/bin/vedit-mcp")
+            .get()
+            .asFile.absolutePath,
+    )
 }

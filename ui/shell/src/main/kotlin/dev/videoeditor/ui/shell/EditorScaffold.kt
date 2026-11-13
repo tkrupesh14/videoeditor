@@ -95,6 +95,8 @@ fun EditorScaffold(
     timeline: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
     ai: (@Composable (Modifier) -> Unit)? = null,
+    /** Optional full-width bar under the top bar (the MCP "Claude connected" chip). */
+    banner: (@Composable () -> Unit)? = null,
 ) {
     val focus = remember { FocusRequester() }
     LaunchedEffect(Unit) { runCatching { focus.requestFocus() } }
@@ -116,7 +118,12 @@ fun EditorScaffold(
                     onShortcut(s)
                     true
                 },
-        topBar = { EditorTopBar(topBar, topBarActions) },
+        topBar = {
+            Column {
+                EditorTopBar(topBar, topBarActions)
+                banner?.invoke()
+            }
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (layoutMode == EditorLayoutMode.SINGLE_PANE) {
@@ -330,6 +337,12 @@ private fun EditorTopBar(
                         menuOpen = false
                         actions.onOpenSample()
                     })
+                    actions.onOpenMcp?.let { open ->
+                        DropdownMenuItem(text = { Text("Claude Code (MCP)") }, onClick = {
+                            menuOpen = false
+                            open()
+                        })
+                    }
                     DropdownMenuItem(text = { Text("Settings") }, onClick = {
                         menuOpen = false
                         actions.onOpenSettings()
