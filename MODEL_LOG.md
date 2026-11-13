@@ -11,3 +11,4 @@
 | 7 | Stop + relaunch timeline and key-store builders at effort medium, continuing from on-disk partial work | Opus 5.5 (builder, medium) | Owner asked to cut Opus token use for current tasks too | running |
 | 8 | Key-store builder stopped again, queued | — | Owner: run tasks one at a time | queued after timeline |
 | 9 | Finish :core:timeline (session/undo, snap, JSON, schemas, dispatcher, 65 tests) | Opus 5.5 (builder, medium) | Main implementation | done; 65 tests pass (43 example, 22 property), re-verified by orchestrator |
+| 10 | Finish key store + spend guard (:core:ai SecretString/ApiKeyFormat/LedgerSpendGuard; :app AndroidKeystoreApiKeyStore, ledger store, backup exclusion) | Opus 5.5 (builder, medium) | Security-critical implementation | done; 75 core:ai + 18 app tests pass (re-verified). Keystore cipher device-untested |

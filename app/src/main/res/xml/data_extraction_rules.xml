@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 31+. docs/design/security.md A1.3: Keystore-bound and abuse-guard files never leave the device. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="secure_ai.xml" />
+        <exclude domain="sharedpref" path="bridge_clients.xml" />
+        <exclude domain="sharedpref" path="spend_ledger.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="secure_ai.xml" />
+        <exclude domain="sharedpref" path="bridge_clients.xml" />
+        <exclude domain="sharedpref" path="spend_ledger.xml" />
+    </device-transfer>
+</data-extraction-rules>

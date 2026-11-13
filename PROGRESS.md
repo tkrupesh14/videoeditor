@@ -9,7 +9,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 | 2. Timeline engine | done | Fable design, Opus (medium) build | 65 tests; entry points in DECISIONS/timeline.md |
 | 3. Preview + export (Media3) | next | | |
 | 4. Responsive UI shell | | | |
-| 5. AI feature A (BYO key) | in progress (5a: key store + spend guard) | Fable design done; Opus building | docs/design/security.md Part A |
+| 5. AI feature A (BYO key) | 5a done (key store + spend guard); 5b (Messages client, UI) queued | Fable design done; Opus building | docs/design/security.md Part A |
 | 6. AI feature B (MCP) | | | |
 | 7. Polish + docs | | | |
 | 8. Final review | | | |
@@ -20,7 +20,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 ## Running now (2026-11-13, resumed 22:10 IST after account rate limit)
 - (done) Haiku: LICENSE_AUDIT.md — clean, no copyleft
 ## Queue (strictly one task at a time)
-1. Opus (medium): finish :core:ai key/spend (written, fixing compile) + :app Keystore store (not started)
+1. (done) key store + spend guard
 2. Sonnet: remaining property tests (PROPERTIES_TODO.md) + fix trim-start rounding gap (see DECISIONS)
 3. Opus (medium): Phase 3 Media3 preview/export
 4. Opus (medium): Phase 4 UI shell, then Sonnet polish

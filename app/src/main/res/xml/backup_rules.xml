@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- API 26-30. Same excludes as data_extraction_rules.xml (docs/design/security.md A1.3). -->
+<full-backup-content>
+    <exclude domain="sharedpref" path="secure_ai.xml" />
+    <exclude domain="sharedpref" path="bridge_clients.xml" />
+    <exclude domain="sharedpref" path="spend_ledger.xml" />
+</full-backup-content>
