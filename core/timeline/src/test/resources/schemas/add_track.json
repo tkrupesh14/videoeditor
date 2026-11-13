@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "description": "Add a track. Tracks are layered: index 0 is the bottom layer, the last track is on top.",
+    "properties": {
+        "kind": {
+            "type": "string",
+            "enum": [
+                "VIDEO",
+                "AUDIO",
+                "OVERLAY",
+                "CAPTION"
+            ],
+            "description": "Kind of track."
+        },
+        "name": {
+            "type": "string",
+            "description": "Track name; default is '<Kind> <n>'."
+        },
+        "index": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Position in the track list (0 = bottom); omit to add on top."
+        }
+    },
+    "required": [
+        "kind"
+    ],
+    "additionalProperties": false
+}

@@ -18,4 +18,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    // Golden JSON Schemas: `./gradlew :core:timeline:test -PupdateSchemas` rewrites them from the generator.
+    systemProperty("schemaDir", file("src/test/resources/schemas").absolutePath)
+    systemProperty("updateSchemas", project.hasProperty("updateSchemas").toString())
+    inputs.dir("src/test/resources/schemas").optional()
 }

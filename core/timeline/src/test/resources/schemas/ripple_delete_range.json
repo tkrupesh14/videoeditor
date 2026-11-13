@@ -1,0 +1,28 @@
+{
+    "type": "object",
+    "description": "Remove a time range from the given tracks (all tracks if omitted) and close the gap.",
+    "properties": {
+        "startUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Range start, in microseconds (1 second = 1000000)."
+        },
+        "endUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Range end (exclusive), in microseconds (1 second = 1000000)."
+        },
+        "trackIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the tracks to cut; omit for all tracks."
+        }
+    },
+    "required": [
+        "startUs",
+        "endUs"
+    ],
+    "additionalProperties": false
+}

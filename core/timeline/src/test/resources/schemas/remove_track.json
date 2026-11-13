@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "description": "Remove a track. Fails if the track has clips unless deleteClips is true.",
+    "properties": {
+        "trackId": {
+            "type": "string",
+            "description": "Id of the track to remove."
+        },
+        "deleteClips": {
+            "type": "boolean",
+            "description": "Also delete the clips on the track."
+        }
+    },
+    "required": [
+        "trackId"
+    ],
+    "additionalProperties": false
+}

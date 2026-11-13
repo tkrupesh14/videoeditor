@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "description": "Delete clips. With ripple, later clips on the same track move left to close the deleted space.",
+    "properties": {
+        "clipIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the clips to delete."
+        },
+        "ripple": {
+            "type": "boolean",
+            "description": "Close the gaps left by the deleted clips on their tracks."
+        }
+    },
+    "required": [
+        "clipIds"
+    ],
+    "additionalProperties": false
+}

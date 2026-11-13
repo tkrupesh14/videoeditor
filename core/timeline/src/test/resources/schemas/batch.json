@@ -1,0 +1,46 @@
+{
+    "type": "object",
+    "description": "Run several commands atomically as one undo step. Each command sees the result of the previous one; if any fails, nothing is applied. Batches cannot be nested.",
+    "properties": {
+        "commands": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "import_media",
+                            "add_track",
+                            "remove_track",
+                            "add_clip",
+                            "split_clip",
+                            "trim_clip",
+                            "move_clip",
+                            "delete_clips",
+                            "ripple_delete_range",
+                            "set_clip_properties",
+                            "add_caption",
+                            "edit_caption",
+                            "apply_cuts",
+                            "set_project_settings"
+                        ]
+                    }
+                },
+                "required": [
+                    "type"
+                ],
+                "additionalProperties": true
+            },
+            "description": "Commands to run in order. Each is an object with a 'type' field naming the command."
+        },
+        "label": {
+            "type": "string",
+            "description": "Label for the undo history."
+        }
+    },
+    "required": [
+        "commands"
+    ],
+    "additionalProperties": false
+}

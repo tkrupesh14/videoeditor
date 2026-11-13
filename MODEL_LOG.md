@@ -6,3 +6,8 @@
 | 2 | Security design: API-key storage, spend cap, MCP auth/transport (docs/design/security.md) | Fable 5.2 (architect) | Brief required hard security design | done; MCP spec 2026-07-28 verified, Kotlin MCP SDK Apache-2.0 (MIT legacy) |
 | 3 | Timeline model + command API + undo design (docs/design/timeline.md) | Fable 5.2 (architect) | Brief: hard data-model/undo design | done; 24 properties in test plan |
 | 4 | Phase 1 scaffold: Gradle 9.9.1, AGP 9.5.1, Kotlin 2.4.21, 8 modules, ktlint, CI, LICENSE | Sonnet 5.5 (worker) | Boilerplate/config | done; assembleDebug test ktlintCheck pass (re-verified by orchestrator) |
+| 5 | LICENSE_AUDIT.md (43 artifacts, 22 transitive POMs, 309 coords scanned) | Haiku 5.5 (scout) | Reading license files | done; no GPL/AGPL/LGPL; verify items: MCP kotlin-sdk MIT→Apache transition, POMs without license blocks |
+| 6 | Timeline engine + key store/spend guard (parallel) | Opus 5.5 (builder x2) | Main implementation | interrupted at ~22:0x by account 5-hour limit (HTTP 429, resets 22:10 IST); partial work kept on disk; resumed same agents after reset |
+| 7 | Stop + relaunch timeline and key-store builders at effort medium, continuing from on-disk partial work | Opus 5.5 (builder, medium) | Owner asked to cut Opus token use for current tasks too | running |
+| 8 | Key-store builder stopped again, queued | — | Owner: run tasks one at a time | queued after timeline |
+| 9 | Finish :core:timeline (session/undo, snap, JSON, schemas, dispatcher, 65 tests) | Opus 5.5 (builder, medium) | Main implementation | done; 65 tests pass (43 example, 22 property), re-verified by orchestrator |

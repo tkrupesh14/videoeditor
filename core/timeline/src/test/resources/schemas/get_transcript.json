@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "description": "Get the transcript of the speech in the timeline, in timeline time (microseconds), the coordinates apply_cuts uses. Each entry names the clip it comes from.",
+    "properties": {
+        "fromUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Only entries ending after this time, in microseconds (1 second = 1000000)."
+        },
+        "toUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Only entries starting before this time, in microseconds (1 second = 1000000)."
+        },
+        "wordLevel": {
+            "type": "boolean",
+            "description": "Return one entry per word instead of per segment."
+        }
+    },
+    "additionalProperties": false
+}

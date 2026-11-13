@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "description": "Move clips as a rigid group to a new start time and/or another track. The destination must be free; nothing is pushed aside.",
+    "properties": {
+        "clipIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the clips to move."
+        },
+        "toStartUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "New start of the earliest listed clip, in microseconds (1 second = 1000000); omit to keep times."
+        },
+        "toTrackId": {
+            "type": "string",
+            "description": "Target track id; all listed clips must be on one track. Omit to keep tracks."
+        }
+    },
+    "required": [
+        "clipIds"
+    ],
+    "additionalProperties": false
+}

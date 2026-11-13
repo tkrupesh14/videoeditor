@@ -1,0 +1,11 @@
+{
+    "type": "object",
+    "description": "Get an overview of the project: name, duration, output settings, tracks and media assets. With full = true, returns the complete project JSON including every clip.",
+    "properties": {
+        "full": {
+            "type": "boolean",
+            "description": "Return the full project JSON instead of the summary."
+        }
+    },
+    "additionalProperties": false
+}

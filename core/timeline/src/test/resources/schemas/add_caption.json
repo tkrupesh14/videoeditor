@@ -1,0 +1,111 @@
+{
+    "type": "object",
+    "description": "Add captions to a caption track (the first caption track if trackId is omitted; one is created if there is none). Captions must not overlap each other or existing captions. New ids are returned in createdIds.",
+    "properties": {
+        "captions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "One caption: a time range and its text.",
+                "properties": {
+                    "startUs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Caption start, in microseconds (1 second = 1000000)."
+                    },
+                    "endUs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Caption end (exclusive), in microseconds (1 second = 1000000)."
+                    },
+                    "text": {
+                        "type": "string",
+                        "description": "Caption text, at most 2000 characters."
+                    }
+                },
+                "required": [
+                    "startUs",
+                    "endUs",
+                    "text"
+                ],
+                "additionalProperties": false
+            },
+            "description": "Captions to add."
+        },
+        "trackId": {
+            "type": "string",
+            "description": "Id of the caption track; omit for the first caption track."
+        },
+        "style": {
+            "type": "object",
+            "description": "Text style for all added captions.",
+            "properties": {
+                "fontSizeFrac": {
+                    "type": "number",
+                    "description": "Font size as a fraction of output height, greater than 0 and at most 0.5."
+                },
+                "color": {
+                    "type": "string",
+                    "description": "Text colour as #AARRGGBB."
+                },
+                "backgroundColor": {
+                    "type": "string",
+                    "description": "Background box colour as #AARRGGBB; omit for none."
+                },
+                "bold": {
+                    "type": "boolean",
+                    "description": "Bold text."
+                },
+                "italic": {
+                    "type": "boolean",
+                    "description": "Italic text."
+                },
+                "align": {
+                    "type": "string",
+                    "enum": [
+                        "START",
+                        "CENTER",
+                        "END"
+                    ],
+                    "description": "Horizontal text alignment."
+                },
+                "fontFamily": {
+                    "type": "string",
+                    "description": "Font family name; omit for the app default."
+                }
+            },
+            "additionalProperties": false
+        },
+        "transform": {
+            "type": "object",
+            "description": "Placement for all added captions; default is the lower third.",
+            "properties": {
+                "translateX": {
+                    "type": "number",
+                    "description": "Horizontal offset of the clip centre from the frame centre, as a fraction of output width, -2..2. +x is right."
+                },
+                "translateY": {
+                    "type": "number",
+                    "description": "Vertical offset of the clip centre from the frame centre, as a fraction of output height, -2..2. +y is down."
+                },
+                "scale": {
+                    "type": "number",
+                    "description": "Scale, 0.01..10. 1.0 = aspect-fit inside the frame for media, natural size for captions."
+                },
+                "rotationDeg": {
+                    "type": "number",
+                    "description": "Clockwise rotation in degrees; normalized to [0, 360)."
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "Opacity, 0..1."
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "captions"
+    ],
+    "additionalProperties": false
+}

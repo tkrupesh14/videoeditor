@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "description": "Change the project name or output settings. Clips are not rescaled.",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "New project name."
+        },
+        "width": {
+            "type": "integer",
+            "minimum": 16,
+            "description": "Output width in pixels, even, 16..8192."
+        },
+        "height": {
+            "type": "integer",
+            "minimum": 16,
+            "description": "Output height in pixels, even, 16..8192."
+        },
+        "frameRate": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Output frame rate, 1..120."
+        }
+    },
+    "additionalProperties": false
+}

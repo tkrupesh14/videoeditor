@@ -1,0 +1,73 @@
+{
+    "type": "object",
+    "description": "Place a range of an asset on a media track. The new clip id is returned in createdIds.",
+    "properties": {
+        "trackId": {
+            "type": "string",
+            "description": "Id of the target track (VIDEO, OVERLAY or AUDIO)."
+        },
+        "assetId": {
+            "type": "string",
+            "description": "Id of the asset to place."
+        },
+        "startUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Timeline start, in microseconds (1 second = 1000000); omit to append after the track's last clip."
+        },
+        "sourceInUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Source in point within the asset, in microseconds (1 second = 1000000)."
+        },
+        "sourceOutUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Source out point within the asset, in microseconds (1 second = 1000000); omit for the asset end."
+        },
+        "speed": {
+            "type": "number",
+            "description": "Playback speed, 0.1..10, rounded to 0.01."
+        },
+        "volume": {
+            "type": "number",
+            "description": "Volume, 0..2 (1 = original)."
+        },
+        "transform": {
+            "type": "object",
+            "description": "Placement in the frame.",
+            "properties": {
+                "translateX": {
+                    "type": "number",
+                    "description": "Horizontal offset of the clip centre from the frame centre, as a fraction of output width, -2..2. +x is right."
+                },
+                "translateY": {
+                    "type": "number",
+                    "description": "Vertical offset of the clip centre from the frame centre, as a fraction of output height, -2..2. +y is down."
+                },
+                "scale": {
+                    "type": "number",
+                    "description": "Scale, 0.01..10. 1.0 = aspect-fit inside the frame for media, natural size for captions."
+                },
+                "rotationDeg": {
+                    "type": "number",
+                    "description": "Clockwise rotation in degrees; normalized to [0, 360)."
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "Opacity, 0..1."
+                }
+            },
+            "additionalProperties": false
+        },
+        "ripple": {
+            "type": "boolean",
+            "description": "Insert: shift later clips on the track right to make room instead of requiring free space."
+        }
+    },
+    "required": [
+        "trackId",
+        "assetId"
+    ],
+    "additionalProperties": false
+}

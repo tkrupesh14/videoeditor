@@ -1,0 +1,33 @@
+{
+    "type": "object",
+    "description": "Move the start or end edge of one clip to a timeline time. With ripple, later clips on the same track shift to keep their distance; without ripple the edge must not run into a neighbour.",
+    "properties": {
+        "clipId": {
+            "type": "string",
+            "description": "Id of the clip to trim."
+        },
+        "edge": {
+            "type": "string",
+            "enum": [
+                "START",
+                "END"
+            ],
+            "description": "Which edge to move."
+        },
+        "toUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Timeline time the edge moves to, in pre-edit coordinates, in microseconds (1 second = 1000000)."
+        },
+        "ripple": {
+            "type": "boolean",
+            "description": "Shift later clips on the same track by the length change."
+        }
+    },
+    "required": [
+        "clipId",
+        "edge",
+        "toUs"
+    ],
+    "additionalProperties": false
+}

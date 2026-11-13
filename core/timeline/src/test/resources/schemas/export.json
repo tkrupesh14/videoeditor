@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "description": "Start exporting the project to a video file, or, with jobId, get the status of an export started earlier. Size and frame rate default to the project output settings.",
+    "properties": {
+        "fileName": {
+            "type": "string",
+            "description": "Output file name without directory."
+        },
+        "width": {
+            "type": "integer",
+            "minimum": 16,
+            "description": "Output width in pixels, even, 16..8192."
+        },
+        "height": {
+            "type": "integer",
+            "minimum": 16,
+            "description": "Output height in pixels, even, 16..8192."
+        },
+        "frameRate": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Output frame rate, 1..120."
+        },
+        "jobId": {
+            "type": "string",
+            "description": "Id of a running export; when given, returns its status and starts nothing."
+        }
+    },
+    "additionalProperties": false
+}

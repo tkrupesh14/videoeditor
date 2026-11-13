@@ -1,0 +1,35 @@
+{
+    "type": "object",
+    "description": "Remove time ranges from every track and close the gaps. All ranges are in the current (pre-edit) timeline coordinates; earlier cuts do not shift later ranges. Fragments shorter than 10 ms are dropped.",
+    "properties": {
+        "ranges": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "description": "A half-open time range [startUs, endUs) in microseconds.",
+                "properties": {
+                    "startUs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Range start (inclusive), in microseconds (1 second = 1000000)."
+                    },
+                    "endUs": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Range end (exclusive), in microseconds (1 second = 1000000). Must be greater than startUs."
+                    }
+                },
+                "required": [
+                    "startUs",
+                    "endUs"
+                ],
+                "additionalProperties": false
+            },
+            "description": "Time ranges to remove."
+        }
+    },
+    "required": [
+        "ranges"
+    ],
+    "additionalProperties": false
+}

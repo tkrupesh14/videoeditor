@@ -1,0 +1,48 @@
+{
+    "type": "object",
+    "description": "Register a media file as an asset. The app probes the file and supplies its metadata. Importing a uri that is already registered changes nothing.",
+    "properties": {
+        "uri": {
+            "type": "string",
+            "description": "Content or file uri of the media."
+        },
+        "durationUs": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Media duration, in microseconds (1 second = 1000000)."
+        },
+        "hasVideo": {
+            "type": "boolean",
+            "description": "Whether the media has a video stream."
+        },
+        "hasAudio": {
+            "type": "boolean",
+            "description": "Whether the media has an audio stream."
+        },
+        "width": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Video width in pixels; required for video."
+        },
+        "height": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Video height in pixels; required for video."
+        },
+        "frameRate": {
+            "type": "number",
+            "description": "Native frame rate of the video."
+        },
+        "displayName": {
+            "type": "string",
+            "description": "Name to show for the asset."
+        }
+    },
+    "required": [
+        "uri",
+        "durationUs",
+        "hasVideo",
+        "hasAudio"
+    ],
+    "additionalProperties": false
+}

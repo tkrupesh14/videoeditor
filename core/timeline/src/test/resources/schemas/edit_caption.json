@@ -1,0 +1,61 @@
+{
+    "type": "object",
+    "description": "Change the text of one caption, or apply a style patch to several captions.",
+    "properties": {
+        "clipIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the caption clips. Only one id is allowed when text is given."
+        },
+        "text": {
+            "type": "string",
+            "description": "New caption text."
+        },
+        "style": {
+            "type": "object",
+            "description": "Style fields to change.",
+            "properties": {
+                "fontSizeFrac": {
+                    "type": "number",
+                    "description": "New font size as a fraction of output height, greater than 0 and at most 0.5."
+                },
+                "color": {
+                    "type": "string",
+                    "description": "New text colour as #AARRGGBB."
+                },
+                "backgroundColor": {
+                    "type": "string",
+                    "description": "New background colour as #AARRGGBB; empty string clears the background."
+                },
+                "bold": {
+                    "type": "boolean",
+                    "description": "Bold text."
+                },
+                "italic": {
+                    "type": "boolean",
+                    "description": "Italic text."
+                },
+                "align": {
+                    "type": "string",
+                    "enum": [
+                        "START",
+                        "CENTER",
+                        "END"
+                    ],
+                    "description": "Horizontal text alignment."
+                },
+                "fontFamily": {
+                    "type": "string",
+                    "description": "Font family name; empty string resets to the app default."
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "required": [
+        "clipIds"
+    ],
+    "additionalProperties": false
+}

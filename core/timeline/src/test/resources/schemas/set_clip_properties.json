@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "description": "Change speed, volume and/or transform of clips. A speed change keeps the source range and changes the clip duration; with ripple later clips on the same track shift accordingly.",
+    "properties": {
+        "clipIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the clips to change."
+        },
+        "speed": {
+            "type": "number",
+            "description": "New speed, 0.1..10, rounded to 0.01 (media clips only)."
+        },
+        "volume": {
+            "type": "number",
+            "description": "New volume, 0..2 (media clips only)."
+        },
+        "transform": {
+            "type": "object",
+            "description": "Transform fields to change.",
+            "properties": {
+                "translateX": {
+                    "type": "number",
+                    "description": "New horizontal offset, fraction of output width, -2..2."
+                },
+                "translateY": {
+                    "type": "number",
+                    "description": "New vertical offset, fraction of output height, -2..2."
+                },
+                "scale": {
+                    "type": "number",
+                    "description": "New scale, 0.01..10."
+                },
+                "rotationDeg": {
+                    "type": "number",
+                    "description": "New clockwise rotation in degrees."
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "New opacity, 0..1."
+                }
+            },
+            "additionalProperties": false
+        },
+        "ripple": {
+            "type": "boolean",
+            "description": "When the speed changes, shift later clips on the same track by the duration change."
+        }
+    },
+    "required": [
+        "clipIds"
+    ],
+    "additionalProperties": false
+}

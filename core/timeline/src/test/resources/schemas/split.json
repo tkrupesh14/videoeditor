@@ -1,0 +1,23 @@
+{
+    "type": "object",
+    "description": "Split clips at a timeline time. Each listed clip must strictly contain atUs. The left part keeps its id; the new right-part ids are returned in createdIds.",
+    "properties": {
+        "clipIds": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Ids of the clips to split."
+        },
+        "atUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Timeline time of the cut, in microseconds (1 second = 1000000)."
+        }
+    },
+    "required": [
+        "clipIds",
+        "atUs"
+    ],
+    "additionalProperties": false
+}

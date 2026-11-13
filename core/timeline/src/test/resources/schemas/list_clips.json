@@ -1,0 +1,21 @@
+{
+    "type": "object",
+    "description": "List clips with their ids, tracks, timeline ranges and source ranges, optionally limited to one track and/or a time window. Times are in microseconds.",
+    "properties": {
+        "trackId": {
+            "type": "string",
+            "description": "Only clips on this track."
+        },
+        "fromUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Only clips ending after this time, in microseconds (1 second = 1000000)."
+        },
+        "toUs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Only clips starting before this time, in microseconds (1 second = 1000000)."
+        }
+    },
+    "additionalProperties": false
+}
