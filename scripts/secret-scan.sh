@@ -32,6 +32,7 @@ patterns=(
   'AKIA[0-9A-Z]{16}'                          # AWS access key id
   'gh[pousr]_[A-Za-z0-9]{30,}'                # GitHub tokens
   'github_pat_[A-Za-z0-9_]{30,}'
+  'vedb1_[A-Za-z0-9_-]{30,}'                 # vedit-mcp bridge token
   'xox[baprs]-[A-Za-z0-9-]{10,}'              # Slack
   'AIza[0-9A-Za-z_-]{35}'                     # Google API key
   '-----BEGIN ([A-Z]+ )?PRIVATE KEY-----'

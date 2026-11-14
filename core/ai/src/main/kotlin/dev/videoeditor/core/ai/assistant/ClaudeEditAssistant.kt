@@ -187,7 +187,12 @@ class ClaudeEditAssistant internal constructor(
                     spendGuard.release(reservation) // Error responses are not billed.
                     return failed(run, ErrorMapping.fromService(e))
                 } catch (e: AnthropicIoException) {
-                    spendGuard.release(reservation) // No response arrived (A3.3).
+                    if (e.causedByTimeout()) {
+                        // A timeout may come after the request reached the API and was billed: fail closed.
+                        spendGuard.settle(reservation, config.model, null)
+                    } else {
+                        spendGuard.release(reservation) // The request never got through (A3.3).
+                    }
                     return failed(run, ErrorMapping.network())
                 } catch (e: AnthropicInvalidDataException) {
                     spendGuard.settle(reservation, config.model, null) // A response arrived; charge pessimistically.
@@ -342,3 +347,8 @@ class ClaudeEditAssistant internal constructor(
         const val PRODUCTION_BASE_URL = "https://api.anthropic.com"
     }
 }
+
+private fun Throwable.causedByTimeout(): Boolean =
+    generateSequence(this as Throwable?) { it.cause }
+        .take(8)
+        .any { it is java.net.SocketTimeoutException || it is java.io.InterruptedIOException }

@@ -8,3 +8,6 @@
 
 ## 2026-11-14 push of 9ae2f3d (Phase 7): SSH banner timeout (open)
 - github.com:22 timing out again; commit kept locally (branch ahead 1). Retry after the final review. Launching the Fable review also failed twice on a transient permission-check timeout; retry when the network settles.
+
+## 2026-11-14 Fable final review interrupted twice (resolved)
+- API timeout, then the account 5-hour limit (reset 08:10 IST). Resumed the same agent each time; review completed.

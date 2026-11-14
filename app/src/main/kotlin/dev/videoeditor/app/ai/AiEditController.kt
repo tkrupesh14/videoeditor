@@ -502,8 +502,9 @@ class AiEditController(
             AiConsentText(
                 title = "AI editing sends data to Anthropic",
                 body =
-                    "To suggest edits, this app sends your project's timeline, the transcript of your clips, " +
-                        "and the timestamps of silences and scene changes to Anthropic, using your own API key. " +
+                    "To suggest edits, this app sends your project's timeline, the transcript of your clips " +
+                        "when one is available, and the timestamps of silences and scene changes to Anthropic, " +
+                        "using your own API key. " +
                         "If you turn on \"Let AI see frames\", a few small still images from your video are sent " +
                         "as well. Your video and audio files never leave this device. Anthropic handles this data " +
                         "under the terms of your Anthropic API account.\n\n$API_CREDITS_DISCLOSURE",

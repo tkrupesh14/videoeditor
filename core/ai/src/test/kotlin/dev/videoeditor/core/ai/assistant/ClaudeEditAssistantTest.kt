@@ -323,6 +323,22 @@ class ClaudeEditAssistantTest {
         }
 
     @Test
+    fun `a read timeout after sending is charged the worst case, not released`() =
+        runBlocking {
+            mock.server.enqueue(
+                okhttp3.mockwebserver
+                    .MockResponse()
+                    .setSocketPolicy(okhttp3.mockwebserver.SocketPolicy.NO_RESPONSE),
+            )
+            val config = AssistantConfig(requestTimeout = java.time.Duration.ofMillis(300))
+            val r = mock.assistant(config).suggest(session(), "x") as AiResult.Failed
+            assertEquals(AiError.Kind.Network, r.error.kind)
+            val snap = mock.guard.snapshot.value
+            assertEquals(MicroUsd.ZERO, snap.reserved)
+            assertTrue(snap.sessionSpent > MicroUsd.ZERO, "a possibly billed request is charged (fail closed)")
+        }
+
+    @Test
     fun `usage settles the ledger with real token counts`() =
         runBlocking {
             mock.enqueueJson(

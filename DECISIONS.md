@@ -46,3 +46,7 @@ Format: date, decision, why. Newest at bottom.
 - "Allow MCP control" is off at every cold start; the bridge only listens while the activity is started.
 - Verified end to end: real Claude Code (claude -p, Haiku, --mcp-config) listed clips and split clip_4 in offline mode; project file changed 3 -> 4 clips.
 - Not built: QR rendering (pair --uri works), visible 60 s countdown, MCP undo tool, bridge transcript (UNSUPPORTED).
+
+## 2026-11-14 Final review follow-up
+- Fixed: timed-out Messages requests are charged the reserved worst case (fail closed); bridge connection exceptions close that connection instead of crashing; secret scan catches vedb1_ tokens; consent text says the transcript is sent only when available.
+- Deferred (see docs/review/final-review.md): pre-send cost estimate in the AI panel (finding 2, should land before real-key use), MCP result-shape/error-type/unit consistency, per-call MCP undo steps, requestId idempotency keyed on id only, Keystore decrypt failure drops all paired clients, pairing mutex detail, fallback-model pricing.

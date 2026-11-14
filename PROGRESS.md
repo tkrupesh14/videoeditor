@@ -12,7 +12,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 | 5. AI feature A (BYO key) | 5a done; done: 5b-1 Claude client + 5b-2 Settings/AI panel/accept-reject/analysis (device-untested) | Fable design done; Opus building | docs/design/security.md Part A |
 | 6. AI feature B (MCP) | done (phone side device-untested); offline mode verified with real Claude Code | Opus (medium) | docs/mcp.md |
 | 7. Polish + docs | done (README, HANDOFF) | Sonnet (worker) | |
-| 8. Final review | | | |
+| 8. Final review | done: no blocker/high; findings 1,3,12,14 fixed; rest listed in docs/review/final-review.md | Fable review, Opus fixes | |
 
 ## Build
 `export JAVA_HOME=$HOME/.local/jdk/jdk-17.0.21+9 ANDROID_HOME=$HOME/Android/Sdk; ./gradlew build`
@@ -29,5 +29,5 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 6. (done) Opus (medium): :core:mcp + app bridge
 6b. (done) Haiku: refresh LICENSE_AUDIT.md (anthropic-java 3.8.0, okhttp 4.12, mockwebserver added; MCP SDK not used; ktor maybe unused) + drop unused catalog entries
 7. (done) Sonnet: docs/README/HANDOFF
-8. (next) Fable: final review (one pass)
+8. (done) Fable: final review (one pass) + orchestrator fixes
 - Cleanup: drop unused security-crypto, ui-tooling-preview, ktor-client-okhttp from catalog once builders finish (avoid concurrent edits)

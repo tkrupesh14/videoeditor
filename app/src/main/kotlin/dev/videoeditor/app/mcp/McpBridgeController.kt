@@ -183,7 +183,19 @@ class McpBridgeController(
         if (listener != null) return
         val l = listenerFactory()
         try {
-            l.start { conn -> scope.launch(io) { server.serve(conn) } }
+            l.start { conn ->
+                scope.launch(io) {
+                    try {
+                        server.serve(conn)
+                    } catch (e: kotlinx.coroutines.CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        // One bad connection (e.g. a Keystore failure while saving a client) must not crash
+                        // the app. Drop that connection only; nothing about it is logged.
+                        runCatching { conn.close() }
+                    }
+                }
+            }
         } catch (e: Exception) {
             allowed.value = false
             throw e
