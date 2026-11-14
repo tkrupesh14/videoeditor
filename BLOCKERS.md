@@ -5,3 +5,6 @@
 
 ## 2026-11-14 push of 8b37b2f: SSH banner timeout (resolved)
 - Two pushes timed out connecting to github.com:22. Commit kept locally; a retry minutes later succeeded. No credentials or remotes changed.
+
+## 2026-11-14 push of 9ae2f3d (Phase 7): SSH banner timeout (open)
+- github.com:22 timing out again; commit kept locally (branch ahead 1). Retry after the final review. Launching the Fable review also failed twice on a transient permission-check timeout; retry when the network settles.
