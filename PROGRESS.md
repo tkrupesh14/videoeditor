@@ -11,7 +11,7 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 | 4. Responsive UI shell | done (device-untested); polish+screenshots next | Opus (medium) | |
 | 5. AI feature A (BYO key) | 5a done; done: 5b-1 Claude client + 5b-2 Settings/AI panel/accept-reject/analysis (device-untested) | Fable design done; Opus building | docs/design/security.md Part A |
 | 6. AI feature B (MCP) | done (phone side device-untested); offline mode verified with real Claude Code | Opus (medium) | docs/mcp.md |
-| 7. Polish + docs | | | |
+| 7. Polish + docs | done (README, HANDOFF) | Sonnet (worker) | |
 | 8. Final review | | | |
 
 ## Build
@@ -28,6 +28,6 @@ Resume cold from here. Phase plan is in HANDOFF.md / the original brief (phases 
 5b. (done) Opus (medium): 5b-2 AI Settings + AI panel + accept/reject + analysis + Remove silences
 6. (done) Opus (medium): :core:mcp + app bridge
 6b. (done) Haiku: refresh LICENSE_AUDIT.md (anthropic-java 3.8.0, okhttp 4.12, mockwebserver added; MCP SDK not used; ktor maybe unused) + drop unused catalog entries
-7. (next) Sonnet: docs/README/HANDOFF
-8. Fable: final review (one pass)
+7. (done) Sonnet: docs/README/HANDOFF
+8. (next) Fable: final review (one pass)
 - Cleanup: drop unused security-crypto, ui-tooling-preview, ktor-client-okhttp from catalog once builders finish (avoid concurrent edits)
