@@ -97,11 +97,15 @@ From [MODEL_LOG.md](MODEL_LOG.md) (19 logged tasks):
 
 JVM renders from fake state, not device captures.
 
+## Final review
+
+The architect's review is in [docs/review/final-review.md](docs/review/final-review.md): 14 findings, none blocker or high. Findings 1, 3, 12 and 14 are fixed. Finding 2 (show a cost estimate before sending) should land before real-key use.
+
 ## Push status
 
 - Branch: `overnight/build-20261113`
-- Last commit: `<<LAST_COMMIT>>`
-- Push succeeded: `<<PUSH_STATUS>>`
+- Last code commit: `bdde2c6` (Phase 8: final review and fixes). The commit that adds this push-status text follows it; `git log -1 origin/overnight/build-20261113` shows the exact tip.
+- Push succeeded: yes. Every phase commit is on `origin/overnight/build-20261113`. A few pushes hit SSH timeouts to github.com and went through on retry (see BLOCKERS.md); no credentials or remotes were changed.
 - The remote currently has only `overnight/build-20261113`; there is no `main` branch yet (`git ls-remote --heads origin`). A `main` branch must be created first (for example from the initial commit) before a PR can be opened. It was intentionally not created here.
 - PR command, once `main` exists:
   ```sh
